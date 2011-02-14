@@ -1,0 +1,47 @@
+;-------------------- Ensure KIXforms V2 installed on local machine. --------------------- 
+if not exist("%SystemRoot%\system32\kixforms.dll") 
+    copy 'kixforms.dll' '%SystemRoot%\system32\' ;<Stopped in VISTA 
+
+else 
+    if getfileversion($bin + 'kixforms.dll') <> getfileversion('%SystemRoot%\system32\kixforms.dll') or 
+       (getfileversion($bin + 'kixforms.dll') = getfileversion('%SystemRoot%\system32\kixforms.dll') and 
+       val(getfileversion($bin + 'kixforms.dll', "SpecialBuild")) > val(getfileversion('%SystemRoot%\system32\kixforms.dll', "SpecialBuild")) ) 
+        copy $bin + 'kixforms.dll' '%SystemRoot%\system32\' ;<Stopped in VISTA 
+
+    endif 
+endif 
+$system = createobject("KiXtart.System") 
+if @error 
+    shell 'regsvr32 /s kixforms.dll' ;<Possibly Stopped in VISTA 
+
+    $system = createobject("KiXtart.System") 
+    if @error 
+        $_ = messagebox('You may not be a local administrator, make sure that you have appropriate rights on your system', 
+                        'Registration of Kixforms.dll failed - CONTACT AN ADMINISTRATOR IMMEDIATELY !',4112) 
+        quit 1 
+    endif 
+endif 
+;----------------------Ensure Kixforms.Net installed on local machine -------------------- 
+if not exist("%SystemRoot%\system32\kixforms.system.dll") 
+ If Exist ('Kixforms.msi') 
+  shell "%systemroot%\system32\msiexec /i KiXforms.msi /norestart /quiet /lexv %windir%\system32\kixforms.system.txt"
+  if not exist("%SystemRoot%\system32\kixforms.system.dll") 
+   $ = Messagebox("KIXFORMS.NET could not install/update."+chr(10)+"Please Contact the ADMINISTRATOR","SEVERE ERROR",4112) 
+   Quit 1 
+  EndIf 
+ EndIf 
+else 
+ $DLL=getfileversion("%SystemRoot%\system32\kixforms.system.dll") 
+ If $DLL <> $NET 
+  If Exist($bin + 'Kixforms_net.msi'); Compare Version to logon.ini 
+   shell "%systemroot%\system32\msiexec /i KiXforms_net.msi /norestart /quiet /lexv %windir%\system32\kixforms.system.txt"
+   if not exist("%SystemRoot%\system32\kixforms.system.dll") 
+    $ = Messagebox("KIXFORMS.NET could not install/update."+chr(10)+"Please Contact the ADMINISTRATOR","SEVERE ERROR",4112) 
+    Quit 1 
+   Else 
+     $DLL=getfileversion("%SystemRoot%\system32\kixforms.system.dll") 
+     ? "Kixform.Net Version "+$DLL+" now installed." 
+   EndIf 
+  Endif 
+ Endif 
+Endif 

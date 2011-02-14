@@ -1,0 +1,69 @@
+if (exist ("p:\iestartpage.no"))
+	exit 0
+endif
+
+
+
+
+
+$URL_Bulletin = "http://bulletin.wrtdesign.com"
+$URL_Intranet = "http://wrtintranet.wrtdesign.com"
+$URL_Intranet_Exists = 0
+$URL_MySite = "http://mysite.wrtdesign.com"
+$URL_MySite_Exists = 0
+
+$IESecondaryStartPagesTotal = 0
+
+$IEMainSettingsRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main"
+$IEStartPageValue = ReadValue($IEMainSettingsRegistryKey, "Start Page")
+$IESecondaryStartPageValue = ReadValue($IEMainSettingsRegistryKey, "Secondary Start Pages")
+
+; Check main URL for bulletin, Intranet or MySite
+Select
+	case instr($IEStartPageValue,$URL_Bulletin)
+		WriteValue($IEMainSettingsRegistryKey, "Start Page", $URL_Intranet, "REG_SZ")
+		$URL_Intranet_Exists = 1
+	case instr($IEStartPageValue,$URL_Intranet)
+		$URL_Intranet_Exists = 1
+	case instr($IEStartPageValue, $URL_MySite)
+		$URL_Intranet_Exists = 1
+endselect
+
+
+; Secondary Start URLs - add WRTIntranet and/or MySite if they don't exist already
+$IESecondaryStartPages = SPLIT ($IESecondaryStartPageValue, "|")
+DIM $IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal]
+
+FOR EACH $URL in $IESecondaryStartPages
+	select
+		case instr($URL,$URL_Bulletin)
+			$URL = $URL_Intranet
+			$URL_Intranet_Exists = 1
+		case instr($URL,$URL_Intranet)
+			$URL_Intranet_Exists = 1
+		case instr($URL,$URL_MySite)
+			$URL_MySite_Exists = 1
+	endselect
+
+	if not ($URL="")
+		$IESecondaryStartPagesTotal = $IESecondaryStartPagesTotal + 1
+		REDIM PRESERVE $IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal]
+		$IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal] = $URL
+	endif
+	
+Next
+
+if $URL_Intranet_Exists = 0
+	$IESecondaryStartPagesTotal = $IESecondaryStartPagesTotal + 1
+	REDIM PRESERVE $IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal]
+	$IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal] = $URL_Intranet
+endif
+
+if $URL_MySite_Exists = 0
+	$IESecondaryStartPagesTotal = $IESecondaryStartPagesTotal + 1
+	REDIM PRESERVE $IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal]
+	$IESecondaryStartPagesRevised[$IESecondaryStartPagesTotal] = $URL_MySite
+endif
+
+$IESecondaryStartPageValue = join ($IESecondaryStartPagesRevised, "|")
+WriteValue($IEMainSettingsRegistryKey, "Secondary Start Pages", right($IESecondaryStartPageValue,len($IESecondaryStartPagesValue)-1)+"|", "REG_MULTI_SZ")

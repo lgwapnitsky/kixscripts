@@ -1,0 +1,12 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;update deltek 6.1 client files...
+;copy files
+	shell 'xcopy I:\deltek\pre-deploy\*.* "C:\Documents and Settings\All Users\Application Data\Deltek\*.*" /Y /Q /D'
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

@@ -1,0 +1,36 @@
+;debug on
+; Include DirectoryParseAndExecute UDF
+; REMOVE THIS PRIOR TO PRODUCTION
+CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+
+Dim $iFileCounter, $cFileCounter
+;Dim $iFileArray[], $cFileArray
+
+$iFileCounter = 0
+$cFileCounter = 0
+
+$iFonts = Dir("i:\winxp\fonts\lte*.*")
+while $iFonts <> "" and @ERROR = 0
+	$iFileCounter = $iFileCounter + 1
+;	REDIM Preserve $iFileArray[$iFileCounter]
+;	$iFileArray[$iFileCounter] = $iFonts
+	$iFonts = Dir()
+loop
+
+$cFonts = Dir("c:\windows\fonts\lte*.*")
+while $cFonts <> "" and @ERROR = 0
+	$cFileCounter = $cFileCounter + 1
+;	REDIM Preserve $cFileArray[$cFileCounter]
+;	$cFileArray[$cFileCounter] = $cFonts
+	$cFonts = Dir()
+loop
+
+? $iFileCounter
+? $cFileCounter
+
+if $iFileCounter > $cFileCounter
+	shell 'psexec -u administrator -p wrtstation cmd /c del "c:\windows\system32\fntcache.dat"'
+;	copy "i:\winxp\fonts\lte*" "c:\windows\fonts" /c /r /s
+	shell 'xcopy "i:\winxp\fonts\lte*.*" "c:\windows\fonts" /d /y /e /v /r'
+	DirectoryParseAndExecute(@SCRIPTDIR+"\fonts_REG","reg")
+endif

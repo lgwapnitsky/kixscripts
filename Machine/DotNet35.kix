@@ -1,0 +1,47 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = ".net35" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Determine Station CPU...
+$CPU = substr (%Computername%, 8, len (%Computername%) - 9)
+? "CPU = " + $CPU
+;messagebox ("Station CPU is " + $CPU, KiXtart, 1)
+
+; Conditional execution...
+Select
+;  Case not($CPU = "36" or $CPU = "38" or $CPU = "26D" or $CPU = "30D" or $CPU = D32)
+;     	messagebox ("CPU is Not in the list. Exiting.", KiXtart, 1)
+;	? "CPU not in list"
+;     	exit
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+;     	do a bunch of stuff
+	? "Running update"
+;copy files
+	shell 'xcopy I:\WinXP\installers\dotnetfx35.exe e:\temp\*.* /Y /Q /D'
+	shell 'xcopy I:\WinXP\installers\NDP20SP2-KB958481-x86.exe e:\temp\*.* /Y /Q /D'
+	shell 'xcopy I:\WinXP\installers\NDP30SP2-KB958483-x86.exe e:\temp\*.* /Y /Q /D'
+	shell 'xcopy I:\WinXP\installers\NDP35SP1-KB958484-x86.exe e:\temp\*.* /Y /Q /D'
+;run them
+	shell 'psexec -u administrator -p wrtstation e:\temp\dotnetfx35.exe /passive /norestart'
+	shell 'psexec -u administrator -p wrtstation e:\temp\NDP20SP2-KB958481-x86.exe /passive /norestart'
+	shell 'psexec -u administrator -p wrtstation e:\temp\NDP30SP2-KB958483-x86.exe /passive /norestart'
+	shell 'psexec -u administrator -p wrtstation e:\temp\NDP35SP1-KB958484-x86.exe /passive /norestart'
+
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

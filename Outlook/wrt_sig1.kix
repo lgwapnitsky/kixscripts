@@ -1,0 +1,198 @@
+;Set Break to on if the script is not running at logon.
+;This will prevent you being logged of when testing this script and closing
+;it when it's running.
+If NOT @LOGONMODE
+	Break off
+EndIf
+
+;$nul=SetConsole("Hide")
+
+;Remove this line when adding to the login script
+$CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
+$SigLoc = $CurrentUserAppData + "\Microsoft\Signatures\"
+
+if (exist("c:\outlook.no") or exist("p:\outlook.no") or exist ("p:\updatesig.no"))
+	exit 0
+else 
+	dir($SigLoc)
+	if @error
+		exit
+	endif
+endif
+
+;Delete all existing signatures.
+;Stuff can change. Therefore the signatures are
+;deleted and recreated each time.
+
+Del $SigLoc + "*.*" /s /h
+
+;Get data from AD
+;Open ADSystemInfo object
+$objSysInfo = CreateObject("ADSystemInfo")
+;Get the username from AD.
+$strUser 	= $objSysInfo.UserName
+;Get the users details using LDAP.
+$objUser	= GetObject("LDAP://" + $strUser)
+;Get the users full name.
+$strName 		= $objUser.FullName
+;Get the users title.
+$strTitle 		= $objUser.Title
+;Get the users default reply e-mail address.
+$strMail 		= $objUser.mail
+;Get the users department.
+;$strDepartment = $objUser.Department
+;Get the users company name.
+$strCompany 	= $objUser.Company
+;Get the users street address.
+$strStreet		= $objUser.streetAddress
+	
+;Get the users postal code.
+$strPostalCode	= $objUser.PostalCode
+;Get the users city.
+$strCity 		= $objUser.l
+;Get the users state
+$strState		= $objUser.st
+;Get the users country.
+;$strCountry 	= $objUser.Co
+;Get the users phone number.
+$strPhone 		= $objUser.telephoneNumber
+;Get the users fax number.
+$strFax		 	= $objUser.FacsimileTelephoneNumber
+;Get the users mobile phone number
+$strMobile		= $objUser.Mobile
+;Get the users homepage.
+;$strWeb		 	= $objUser.wWWHomePage
+DIM $arrWeb[0]
+$arrWeb[0] = "www.wrtdesign.com"
+; if instr($strMail, "solomonetc")
+	; redim PRESERVE $arrWeb[1]
+	; $arrWeb[1] = "www.solomonetc-wrt.com"
+; endif
+;Get the users description
+$strDescription	= $objUser.description
+;Get the users notes
+$strNotes = $objUser.info
+
+
+;Initialize word to write the signature.
+$objWord = CreateObject("Word.Application")
+;Add a document to word and set various options.
+$objDoc = $objWord.Documents.Add()
+$objSelection = $objWord.Selection
+$objEmailOptions = $objWord.EmailOptions
+$objSignatureObject = $objEmailOptions.EmailSignature
+$objSignatureEntries = $objSignatureObject.EmailSignatureEntries
+
+;Write signature.
+;Set font to use in the signature.
+$objSelection.Font.Color = "0"
+$objSelection.Font.Name = "Arial"
+;Set the font size.
+$objSelection.Font.Size = "9"
+;Write text and use the variables filled when retrieving data from AD.
+$objSelection.Font.bold = "1"
+$objSelection.TypeText($strName)
+if LEN($strDescription) > 0
+	$objSelection.TypeText(", " + $strDescription)
+endif
+;Set font size.
+$objSelection.Font.Size = "8"
+$objSelection.Font.bold = "0"
+;Write a "soft" enter. Just like br in HTML.
+$objSelection.TypeText(Chr(11))
+;Write text and use the variables filled when retrieving data from AD.
+$objSelection.TypeText($strTitle)
+$objSelection.TypeText(Chr(11))
+
+if LEN($strNotes) > 0
+	$splitNotes = join(split($strNotes,@CRLF),CHR(11))
+	$objSelection.TypeText($splitNotes)
+	$objSelection.TypeText(Chr(11))
+endif
+
+$objSelection.Font.Bold = "1"
+$objSelection.Font.Color = "3152295"
+$objSelection.TypeText($strCompany)
+$objSelection.TypeText(Chr(11))
+;Set the colour of the following text.
+$objSelection.Font.Color = "0"
+$objSelection.Font.Bold = "0"
+;Write text and use the variables filled when retrieving data from AD.
+$objSelection.TypeText($strStreet + ", " + $strCity + ", " + $strState + " " + $strPostalcode)
+
+;Write a "soft" enter. Just like br in HTML.
+$objSelection.TypeText(Chr(11))
+;Write text and use the variables filled when retrieving data from AD.
+if instr($strPhone,",,,")
+	$tempPhone = left($strPhone,14)
+	select
+		case left(right($strPhone,3),1)=","
+			$phoneExt = right($strPhone,2)
+		case left(right($strPhone,4),1)=","
+			$phoneExt = right($strPhone,3)
+		case left(right($strPhone,5),1)=","
+			$phoneExt = right($strPhone,4)
+	endselect
+	
+	$strPhone = $tempPhone + " x." + $phoneExt
+endif
+$objSelection.TypeText("T " + $strPhone + Chr(9))
+If not instr($strPhone,"x.")
+	$objSelection.TypeText(Chr(9))
+EndIf
+
+$objSelection.TypeText("F " + $strFax)
+$objSelection.TypeText(Chr(11))
+
+if LEN($strMobile) > 0
+	$objSelection.TypeText("C " + $strMobile + Chr(9) + Chr(9))
+endif
+
+$objSelection.TypeText("E ")
+$objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"mailto://"+$strMail,,"E-mail " + $strName, $strMail)
+$HyperTextString = len($strMail) + 1
+$objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
+$objSelection.font.size = "8"
+$objSelection.Font.Color = "0"
+$objSelection.Font.Underline = "0"
+$objSelection.Font.Name = "Arial"
+$objSelection = $objWord.Selection
+$objSelection.TypeText(Chr(11))
+
+$domainNumber = 0
+for each $DomainName in $arrWeb
+	$objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"http://"+$DomainName,,"", $DomainName)
+	$HyperTextString = len($DomainName) + 1
+	$objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
+	$objSelection.font.size = "8"
+	$objSelection.Font.Color = "0"
+	$objSelection.Font.Underline = "0"
+	$objSelection.Font.Name = "Arial"
+	$objSelection = $objWord.Selection
+	$domainNumber = $domainNumber + 1
+	if (UBound($DomainName) > 0) AND ($domainNumber < UBound($DomainName))
+		$objSelection.TypeText(Chr(11))
+	endif
+Next
+
+$objSelection = $objDoc.Range()
+
+;Add signature.
+;You could change @FULLNAME to whatever you want. Just be sure to change it the same on the
+;two parts below where outlook is told to use or not use a signature on the different types of messages.
+$objSignature = $objSignatureEntries.Add(@FULLNAME, $objSelection)
+
+;Set outlook to use the signatures on each new message.
+$objSignatureObject.NewMessageSignature = @FULLNAME
+;$objSignatureObject.NewMessageSignature = ""
+;Switch the ; on the two lines above to use no signature on new messages.
+
+;Set outlook to use the signatures on each reply message.
+$objSignatureObject.ReplyMessageSignature = @FULLNAME
+;$objSignatureObject.ReplyMessageSignature = @FULLNAME + " NL"
+;$objSignatureObject.ReplyMessageSignature = ""
+;Switch the ; on the top line and the line above to use no signature on reply messages.
+
+;Save the signature and quit word
+$objDoc.Saved = 1
+$objWord.Quit

@@ -1,0 +1,32 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "NWC_BadServer" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Conditional execution...
+Select
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+	? "Running update"
+;     	do a bunch of stuff
+	shell 'xcopy I:\winxp\config3\NWC_badserver.reg e:\temp\*.* /Y /Q /D'
+	shell 'psexec -u administrator -p wrtstation regedit /s e:\temp\NWC_badserver.reg'
+
+    ;update registry...
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

@@ -1,0 +1,41 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "IE7-WindowsXP-KB980182-x86-ENU" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Determine Station CPU...
+$CPU = substr (%Computername%, 8, len (%Computername%) - 9)
+? "CPU = " + $CPU
+;messagebox ("Station CPU is " + $CPU, KiXtart, 1)
+
+; Conditional execution...
+Select
+;  Case not($CPU = "36" or $CPU = "38" or $CPU = "26D" or $CPU = "30D" or $CPU = D32)
+;     	messagebox ("CPU is Not in the list. Exiting.", KiXtart, 1)
+;	? "CPU not in list"
+;     	exit
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+;     	do a bunch of stuff
+	? "Running update"
+;copy files
+	shell 'xcopy I:\WinXP\config3\IE7-WindowsXP-KB980182-x86-ENU.exe e:\temp\*.* /Y /Q /D'
+;run them
+	shell 'psexec -u administrator -p wrtstation e:\temp\IE7-WindowsXP-KB980182-x86-ENU.exe /quiet /norestart'
+
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

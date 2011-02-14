@@ -1,0 +1,27 @@
+; Include DirectoryParseAndExecute UDF
+
+$FileServer = %SERVER%
+if $FileServer = ""
+	$FileServer = "WRT_PH"
+endif
+
+$VSTOSecurityInclusionRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\VSTO\Security\Inclusion"
+$OffsiteTaglineRegistryKey = $VSTOSecurityInclusionRegistryKey + "\f910140d-4169-458a-be65-1dee828cad71"
+
+
+if NOT KeyExist($OffsiteTaglineRegistryKey)
+	? "Installing Offsite Tagline Add-in for Outlook..."
+	DirectoryParseAndExecute(@SCRIPTDIR+"\OffsiteTaglineRegFiles","reg")
+	do
+		sleep 10
+	until KeyExist($OffsiteTaglineRegistryKey)
+	
+	$InstallURL = ReadValue($OffsiteTaglineRegistryKey, "URL")
+	$SplitURL =  split($InstallURL, "/")
+	$SplitURL[2] = $FileServer;
+	$InstallURL = WriteValue($OffsiteTaglineRegistryKey, "URL", join($SplitURL, "/"), "REG_SZ")
+	
+	sleep 10
+	
+	shell '"C:\Program Files\Common Files\Microsoft Shared\VSTO\10.0\vstoinstaller" /s /i \\' + $FileServer + '\apps\OffsiteFooter\Offsite35OL2007_CSh\WRTOffsite_NET35.vsto'
+endif

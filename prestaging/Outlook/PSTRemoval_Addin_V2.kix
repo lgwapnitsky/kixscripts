@@ -1,0 +1,40 @@
+;debug on
+; Include DirectoryParseAndExecute UDF
+; REMOVE THIS PRIOR TO PRODUCTION
+ CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+
+$FileServer = %SERVER%
+if $FileServer = ""
+	$FileServer = "WRT_PH"
+endif
+
+$VSTOSecurityInclusionRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\VSTO\Security\Inclusion"
+$oldPSTRemoveRegistryKey = $VSTOSecurityInclusionRegistryKey + "\24a55b35-ccee-4a9e-8442-33a8165ba132"
+
+$newPSTRemoveRegistryKey = $VSTOSecurityInclusionRegistryKey + "\bb14890e-6bb9-4198-9e4e-c640c9ad2bf0"
+
+shell '"C:\Program Files\Common Files\Microsoft Shared\VSTO\10.0\vstoinstaller" /s /u \\' + $FileServer + '\apps\OutlookAddins_WRT\PSTRemove\PST_Remove.vsto'
+
+if KeyExist($oldPSTRemoveRegistryKey)
+	
+	shell 'i:\OutlookAddins_WRT\PSTRemoval_V2\PST_XMLtoRegistry.exe'
+	DelKey($oldPSTRemoveRegistryKey)
+endif
+
+
+if NOT KeyExist($newPSTRemoveRegistryKey)
+	DirectoryParseAndExecute(@SCRIPTDIR+"\PSTRV2RegFiles","reg")
+	do
+		sleep 10
+	until KeyExist($PSTRemoveRegistryKey)
+	
+	$InstallURL = ReadValue($newPSTRemoveRegistryKey, "URL")
+	$SplitURL =  split($InstallURL, "/")
+	$SplitURL[2] = $FileServer
+	$InstallURL = WriteValue($newPSTRemoveRegistryKey, "URL", join($SplitURL, "/"), "REG_SZ")
+	
+	sleep 10
+	
+	shell '"C:\Program Files\Common Files\Microsoft Shared\VSTO\10.0\vstoinstaller" /s /i \\' + $FileServer + '\apps\OutlookAddins_WRT\PSTRemoval_V2\PSTRemoval_V2.vsto'
+	
+ endif

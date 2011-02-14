@@ -1,0 +1,58 @@
+;This section is redundant when made part of the login script, but is needed if it is run on its own
+; User IDs for Windows & Novell
+;$WID = @WUSERID
+;$NID = left($WID, 8)
+
+; Home Directory
+;Global $NetDirectory
+;$NetDirectory = "\\wrt_ph\user\"+$NID
+
+;NetDirectory
+$NetDirectory = "p:\"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Global $filename
+$filename = $NetDirectory + "currentjob.txt"
+
+
+;Open ADSystemInfo object
+$objSysInfo = CreateObject("ADSystemInfo")
+;Get the username from AD.
+$strUser 	= $objSysInfo.UserName
+;Get the users deatils using LDAP.
+$objUser	= GetObject("LDAP://" + $strUser)
+;Get the users title.
+Global $strTitle
+$strTitle 		= $objUser.Title
+
+if Open(3, $filename) = 0
+	EditCurrentJobTXT()
+	close(3)
+else
+	copy "i:\winxp\currentjob.txt" $NetDirectory+"currentjob.txt"
+	EditCurrentJobTXT()
+	close(3)
+endif
+
+EditCurrentJobTXT()
+
+Function EditCurrentJobTXT()
+	move $filename $filename+".bak"
+	open(1, $filename + ".bak",2)
+	open(2, $filename, 5)
+	$x = readline(1)
+	$count = 0
+
+	while @error = 0
+		if $count = 2
+			writeline(2, $strTitle + @CRLF)
+		else
+			writeline(2, $x + @CRLF)
+		endif
+		$count = $count + 1
+		$x = readline(1)
+	loop
+	close(1)
+	close(2)
+	del $filename+".bak"
+EndFunction

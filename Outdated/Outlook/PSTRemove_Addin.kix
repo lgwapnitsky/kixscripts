@@ -1,0 +1,30 @@
+;debug on
+; Include DirectoryParseAndExecute UDF
+; REMOVE THIS PRIOR TO PRODUCTION
+CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+
+$FileServer = %SERVER%
+if $FileServer = ""
+	$FileServer = "WRT_PH"
+endif
+
+$VSTOSecurityInclusionRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\VSTO\Security\Inclusion"
+$PSTRemoveRegistryKey = $VSTOSecurityInclusionRegistryKey + "\24a55b35-ccee-4a9e-8442-33a8165ba132"
+
+
+if NOT KeyExist($PSTRemoveRegistryKey)
+	DirectoryParseAndExecute(@SCRIPTDIR+"\PSTRemoveRegFiles","reg")
+	do
+		sleep 10
+	until KeyExist($PSTRemoveRegistryKey)
+	
+	$InstallURL = ReadValue($PSTRemoveRegistryKey, "URL")
+	$SplitURL =  split($InstallURL, "/")
+	$SplitURL[2] = $FileServer;
+	$InstallURL = WriteValue($PSTRemoveRegistryKey, "URL", join($SplitURL, "/"), "REG_SZ")
+	
+	sleep 10
+	
+	shell '"C:\Program Files\Common Files\Microsoft Shared\VSTO\10.0\vstoinstaller" /s /i \\' + $FileServer + '\apps\OutlookAddins_WRT\PSTRemove\PST_Remove.vsto'
+	
+endif

@@ -1,0 +1,32 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "menu_update_2" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Conditional execution...
+Select
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+	? "Running update"
+;     	do a bunch of stuff
+	shell 'xcopy "I:\WinXP\Shared3\programs\7.  Resource Library\ICC 2009 International Codes.lnk" "e:\temp\*.*" /S /Q /Y'
+	shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\ICC 2009 International Codes.lnk" "C:\Documents and Settings\All Users\Network Menu\programs\7.  Resource Library\*.*" /S /Q /Y'
+    ;update registry...
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit
+

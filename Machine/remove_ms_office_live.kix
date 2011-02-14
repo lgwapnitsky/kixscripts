@@ -1,0 +1,11 @@
+;Remove MS Office Live Plugin 1.4
+
+$MSOfficeLiveUninstallKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{AE3CF174-872C-46C6-B9F6-C0593F3BC7B8}"
+
+select
+	case keyexist($MSOfficeLiveUninstallKey)
+		$MSOfficeLiveUninstallStringValue = "{AE3CF174-872C-46C6-B9F6-C0593F3BC7B8}"
+		shell 'psexec -u administrator -p wrtstation -e msiexec /uninstall ' + $MSOfficeLiveUninstallStringValue + ' /qn /passive'
+	case 1
+		? "MS Office Live Plugin 1.4 already removed"
+endselect

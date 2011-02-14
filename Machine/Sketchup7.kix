@@ -1,0 +1,66 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+Debug offxcopy
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "Sketchup7" ; the update value to test.
+$UpdateValueNew = "3" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Determine Station CPU...
+$CPU = substr (%Computername%, 8, len (%Computername%) - 9)
+? "CPU = " + $CPU
+;messagebox ("Station CPU is " + $CPU, KiXtart, 1)
+
+
+
+; Conditional execution...
+Select
+  Case not($CPU = "38" or $CPU = "26D" or $CPU = "30D" or $CPU = "D32" or $CPU="320" or %Computername% = "ACPI-MP")
+;     	messagebox ("CPU is Not in the list. Exiting.", KiXtart, 1)
+	? "CPU not in list"
+     	exit
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+;     	do a bunch of stuff
+	?
+	? "Installing Sketchup 7.  This may take several minutes..."
+    ;copy files to temp drive...
+	shell 'xcopy i:\sketchup\googlesketchup7.msi e:\temp\*.* /Y /Q /D'
+	shell 'xcopy i:\winxp\config3\runskinstall.bat e:\temp\*.* /Y /Q /D'
+	shell 'xcopy i:\winxp\config3\runskinstall.lnk e:\temp\*.* /Y /Q /D'
+	shell 'xcopy "I:\sketchup\server.dat" e:\temp\*.* /Y /Q'
+	shell 'xcopy "I:\WinXP\Shared3\programs\4.  CAD Programs\Application Notes\Google SketchUp 7\*.*" "e:\temp\Google SketchUp 7\*.*" /S /Q /Y'
+    ;run with admin...
+	?
+	? "Installing Sketchup 7.  This may take several minutes......"
+	shell 'psexec -u administrator -p wrtstation e:\temp\runskinstall.bat'
+	shell 'psexec -u administrator -p wrtstation xcopy e:\temp\server.dat "D:\Program files\Google\Google Sketchup 7\*.*" /Y /Q'
+    ;delete temp file...
+	del e:\temp\googlesketchup7.msi /Q
+    ;delete desktop icons...
+	shell 'psexec -u administrator -p wrtstation cmd /C del "C:\Documents and Settings\All Users\Network Menu\desktop\google sketchup 7.lnk" /Q'
+	shell 'psexec -u administrator -p wrtstation cmd /C del "C:\Documents and Settings\All Users\Network Menu\desktop\layout 2.lnk" /Q'
+	shell 'psexec -u administrator -p wrtstation cmd /C del "C:\Documents and Settings\All Users\Network Menu\desktop\style builder.lnk" /Q'
+    ;delete menu items...
+	shell 'psexec -u administrator -p wrtstation cmd /C rd "C:\Documents and Settings\All Users\Network Menu\programs\Google SketchUp 7" /S /Q'
+	shell 'psexec -u administrator -p wrtstation cmd /C del "C:\Documents and Settings\All Users\Network Menu\programs\4.  CAD Programs\Google Sketchup 6.lnk" /Q'
+	shell 'psexec -u administrator -p wrtstation cmd /C del "C:\Documents and Settings\All Users\Network Menu\programs\4.  CAD Programs\Google Layout.lnk" /Q'
+    ;create menu items...
+	shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\Google SketchUp 7\*.*" "C:\Documents and Settings\All Users\Network Menu\programs\4.  CAD Programs\Application Notes\Google SketchUp 7\*.*" /S /Q /Y'
+	shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\Google SketchUp 7\Google SketchUp 7.lnk" "C:\Documents and Settings\All Users\Network Menu\programs\4.  CAD Programs\*.*" /S /Q /Y'
+	shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\Google SketchUp 7\Google Layout.lnk" "C:\Documents and Settings\All Users\Network Menu\programs\4.  CAD Programs\*.*" /S /Q /Y'
+    ;update registry...
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

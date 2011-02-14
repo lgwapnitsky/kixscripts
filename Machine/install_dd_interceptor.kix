@@ -1,0 +1,37 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "dd_interceptor" ; the update value to test.
+$UpdateValueNew = "2" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Conditional execution...
+Select
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+	? "Running update"
+;     	do a bunch of stuff
+	shell 'xcopy "I:\WinXP\Setup Drag-n-Drop Intercept.exe" "e:\temp\*.*" /S /Q /Y'
+	shell 'xcopy "I:\WinXP\DDInterceptor.English.txt" "e:\temp\*.*" /S /Q /Y'
+	shell 'psexec -u administrator -p wrtstation "e:\temp\Setup Drag-n-Drop Intercept.exe" /Verysilent /NoRestart'
+	shell 'regsvr32 /s "C:\Program Files\DDInterceptor\CopyHook.dll"'
+	shell 'regsvr32 /s "C:\Program Files\DDInterceptor\DDInterc.dll"'
+	shell 'psexec -u administrator -p wrtstation xcopy e:\temp\DDInterceptor.English.txt "C:\Program Files\DDInterceptor\Translations\English.txt" /Y /Q'
+
+
+    ;update registry...
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

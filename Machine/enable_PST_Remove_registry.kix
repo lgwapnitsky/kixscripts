@@ -1,0 +1,30 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\Office\Outlook\AddIns\PSTRemoval_V2" ; the update key
+$UpdateValue = "LoadBehavior" ; the update value to test.
+$UpdateValueNew = "3" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Conditional execution...
+Select
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+	? "Running update"
+;     	do a bunch of stuff
+    ;update registry...
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_DWORD")
+
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit
+

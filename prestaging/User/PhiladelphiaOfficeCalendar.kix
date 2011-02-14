@@ -1,0 +1,24 @@
+cls
+DEBUG On
+
+$OutlookCalendarRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Outlook\Options\Accounts"
+$OutlookPHIntranetCalendarValue = ReadValue($OutlookCalendarRegistryKey, "PH_Intranet")
+$PHIntranetURL = "stssync://sts/?ver=1.1&type=calendar&cmd=add-folder&base-url=http://wrtintranet.wrtdesign.com/Administration/phillyoffice&list-url=/Lists/Calendar/&guid=%7b81f9dd5b-de80-47cb-b9b0-207deaee5f26%7d&site-name=Philadelphia%20Office&list-name=Philadelphia%20Office%20Calendar"
+
+; Check to see if the individual is part of the Philadelphai Office\12
+;Open ADSystemInfo object
+$objSysInfo = CreateObject("ADSystemInfo")
+;Get the username from AD.
+$strUser 	= $objSysInfo.UserName
+;Get the users deatils using LDAP.
+$objUser	= GetObject("LDAP://" + $strUser)
+;Get the users default reply e-mail address.
+$strMail 		= $objUser.mail
+
+select
+	case instr($strMail, "ph.wrtdesign")
+		WriteValue($OutlookCalendarRegistryKey, "PH_Intranet", $PHIntranetURL, "REG_SZ")
+	case 1
+		exit
+endselect
+

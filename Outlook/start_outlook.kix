@@ -1,0 +1,23 @@
+;Check to see if no mail access is required.  If not, then start Outlook regularly
+
+dim $OutlookVersion
+
+$Office11 = "d:\progra~1\micros~1\office11\"
+$Office12 = "d:\progra~1\micros~1\office12\"
+$OutlookExecutable = "outlook.exe"
+
+if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
+	Select
+		case exist($Office11 + $OutlookExecutable)
+			$OutlookVersion = $Office11 + $OutlookExecutable
+			run $OutlookVersion
+		case exist($Office12 + $OutlookExecutable)
+			$OutlookVersion = $Office12 + $OutlookExecutable
+			run $OutlookVersion
+	EndSelect
+
+	if exist ("c:\frontdesk.txt")
+			run $OutlookVersion + " /x " + chr(34) + "I:\winxp\incoming faxes.xnk" + chr(34)
+	endif
+endif
+

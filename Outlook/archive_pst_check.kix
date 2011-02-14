@@ -1,0 +1,6 @@
+; Check for archive.pst
+if not exist($HomeDir+"\archive.pst")
+	copy "i:\winxp\archive.pst" $HomeDir+"\archive.pst"
+endif
+	
+	

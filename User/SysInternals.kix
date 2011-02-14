@@ -1,0 +1,11 @@
+; Run EULA acceptance for SysInternals utilities
+
+
+$SysInternalsRegistryKey = "HKEY_CURRENT_USER\Software\Sysinternals"
+$SysInternalsValueWRT = "1" ; the current level for New Users
+$SysInternalsValueFromRegistry = ReadValue($SysInternalsRegistryKey, "SysInternals")
+
+If NOT ($SysInternalsValueFromRegistry = $SysInternalsValueWRT)	
+	DirectoryParseAndExecute(@SCRIPTDIR+"\SysInternalsRegFiles","reg")
+	WriteValue ($SysInternalsRegistryKey,"SysInternals",$SysInternalsValueWRT,"REG_SZ")
+endif

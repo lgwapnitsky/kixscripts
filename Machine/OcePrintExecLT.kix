@@ -1,0 +1,48 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "PELT1315" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Determine Station CPU...
+$CPU = substr (%Computername%, 8, len (%Computername%) - 9)
+? "CPU = " + $CPU
+;messagebox ("Station CPU is " + $CPU, KiXtart, 1)
+
+; Conditional execution...
+Select
+  Case not($CPU = "38" or $CPU = "26D" or $CPU = "30D" or $CPU = D32)
+;     	messagebox ("CPU is Not in the list. Exiting.", KiXtart, 1)
+	? "CPU not in list"
+     	exit
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+;     	do a bunch of stuff
+	? "Running update"
+	shell 'xcopy I:\Oce\NRI_PrintExecLT_andLicense\*.* e:\temp\NRI_PrintExecLT_andLicense\*.* /Y /Q /S /D'
+
+	shell 'psexec -u administrator -p wrtstation e:\temp\NRI_PrintExecLT_andLicense\oce_pelt1315.exe -i silent'
+
+	shell 'psexec -u administrator -p wrtstation xcopy e:\temp\NRI_PrintExecLT_andLicense\PELT.lic "C:\Program Files\Print Exec LT\*.*" /S /Q /Y'
+
+	shell 'psexec -u administrator -p wrtstation xcopy e:\temp\NRI_PrintExecLT_andLicense\system\*.* "C:\Program Files\Print Exec LT\system\*.*" /S /Q /Y'
+
+	shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\NRI_PrintExecLT_andLicense\Océ Print Exec LT.lnk" "C:\Documents and Settings\All Users\Network Menu\programs\6.  Accessories and Utilities\*.*" /S /Q /Y'
+
+	shell 'cmd /C rd e:\temp\NRI_PrintExecLT_andLicense /S /Q'
+
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

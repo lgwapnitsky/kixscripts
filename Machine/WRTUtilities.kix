@@ -1,0 +1,42 @@
+Break On Cls
+;debug on
+
+$WRTUtilities = "WRT Utilities"
+$ShortcutsDir_Net = "I:\winxp\Shared3\programs\6.  Accessories and Utilities"
+$ShortcutsDir_Local = "C:\Documents and Settings\All Users\Network Menu\programs\6.  Accessories and Utilities"
+$ShortcutsDir_WRTUtilities_Net = $ShortcutsDir_Net + "\" + $WRTUtilities
+$ShortcutsDir_WRTUtilities_Local = $ShortcutsDir_Local + "\" + $WRTUtilities
+$ProgramsDir_WRTUtiltities_Net = "i:\utilities"
+$ProgramsDir_WRTUtiltities_Local = "d:\Program Files\" + $WRTUtilities
+
+$arrDirectories = $ShortcutsDir_WRTUtilities_Local, $ProgramsDir_WRTUtiltities_Local
+
+for each $directory in $arrDirectories
+	if not exist($directory)
+		shell 'psexec -u administrator -p wrtstation cmd /C md ' + chr(34) + $directory + chr(34)
+	endif
+next
+
+WRTUtilities_FilesExist($ProgramsDir_WRTUtiltities_Net, $ProgramsDir_WRTUtiltities_Local, "exe")
+WRTUtilities_FilesExist($ShortcutsDir_WRTUtilities_Net, $ShortcutsDir_WRTUtilities_Local, "lnk")
+
+
+Function WRTUtilities_FilesExist($FEnetpath, $FElocalpath, $FEfiletype)
+	$toCheck = dir($FEnetpath + "\*." + $FEfiletype)
+	while $toCheck <> "" and @ERROR = 0
+		select
+			case not exist ($FEnetpath + "\" + $toCheck)
+				WRTUtilities_FileCopy($FEnetpath, $FElocalpath, $toCheck)
+			case GetFileTime($FElocalpath + "\" + $toCheck) < GetFileTime($FEnetpath + "\" + $toCheck)
+				WRTUtilities_FileCopy($FEnetpath, $FElocalpath, $toCheck)
+		endselect
+		$toCheck = dir()
+	 loop
+EndFunction
+
+Function WRTUtilities_FileCopy($FCnetpath, $FClocalpath, $FCfile)
+			shell 'xcopy "' + $FCnetpath + '\' + $FCfile + '" e:\temp /s /q /y'
+			shell 'psexec -u administrator -p wrtstation xcopy "e:\temp\' + $FCfile + '" "' + $FClocalpath + '" /s /q /y'
+			shell 'psexec -u administrator -p wrtstation cmd /C del /q e:\temp\' + $FCfile
+			del "e:\temp\" + $FCfile
+EndFunction

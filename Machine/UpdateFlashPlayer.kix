@@ -1,0 +1,32 @@
+; Update Flash Player
+$FlashPlayerVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Macromedia\FlashPlayer"
+
+; the latest WRT-supported version
+$FlashSupported = split(getfileversion("i:\adobe\install_flash_player_ax.exe", BinFileVersion),".")
+
+
+$FlashFromRegistry = ReadValue($FlashPlayerVersionKey,"CurrentVersion")
+
+if $FlashFromRegistry = ""
+	InstallFlash()
+	quit
+endif
+
+$counter = 0
+for each $element in split($FlashFromRegistry,",")
+	? $FlashSupported[$counter] & " " & $element
+	if abs($element) < abs($FlashSupported[$counter])
+		InstallFlash()
+		Exit
+	else $counter = $counter + 1
+	endif
+ next
+
+
+Function InstallFlash()
+	? "updating Flash..."
+	copy "i:\adobe\install_flash_player_ax.exe" "e:\temp\install_flash_player_ax.exe"
+	shell "psexec -u administrator -p wrtstation e:\temp\install_flash_player_ax.exe -install"
+	del "e:\temp\install_flash_player_ax.exe"
+EndFunction
+

@@ -1,0 +1,133 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Break On Cls
+;$nul=SetConsole("Hide")
+
+call "kix_install.kix"
+
+;This is an error check to see if KiXforms is installed on the machine that is running the 
+$System = CreateObject("Kixforms.System")
+
+; If it is not installed, then register the dll
+If Not $System 
+	md "c:\kixforms"
+	copy "kixforms.dll" "c:\kixforms\kixforms.dll"
+	run "regsvr32 c:\kixforms\kixforms.dll /s"
+EndIf 
+
+; User IDs for Windows & Novell
+$WID = @WUSERID
+$NID = left($WID, 8)
+
+; Home Directory
+$HomeDir = "\\wrt_ph\user\"+$NID
+
+; WRT WinXP Configuration Directory
+$WinXPConfig = "i:\winxp\config3"
+
+; C Drive Documents And Settings - All Users - Application Data
+$AllUsersAppData = "C:\Documents and Settings\All Users\Application Data"
+
+$CurrentUserAppData = "P:\WinXP\Application Data"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+$Form1 = $System.Form()
+$Form1.ControlBox = -1  ;True
+$Form1.Font = $System.Font("Consolas",20.25,0) ;Regular
+$Form1.FormBorderStyle = 5  ;FormBorderStyle_FixedToolWindow
+$Form1.MaximizeBox = 0  ;False
+$Form1.MinimizeBox = 0  ;False
+$Form1.StartPosition = 1  ;FormStartPosition_CenterScreen
+$Form1.Size = $System.Size(640,480) ;(Width,Height)
+$Form1.Text = "LoginScript"
+$Form1.ShowInTaskbar = 0  ;False
+
+;$Form1 = $System.Form()
+;$Form1.ControlBox = -1  ;True
+;$Form1.Font = $System.Font("Consolas",20.25,0) ;Regular
+;$Form1.FormBorderStyle = 5  ;FormBorderStyle_FixedToolWindow
+;$Form1.MaximizeBox = 0  ;False
+;$Form1.MinimizeBox = 0  ;False
+;$Form1.StartPosition = 1  ;FormStartPosition_CenterScreen
+;$Form1.Size = $System.Size(733,587) ;(Width,Height)
+;$Form1.Text = "LoginScript"
+
+$ProgressBar1 = $System.ProgressBar()
+$ProgressBar1.Height = 33
+$ProgressBar1.Left = 80
+$ProgressBar1.Text = ""
+
+
+$ProgressBar1 = $System.ProgressBar()
+$ProgressBar1.Height = 25
+$ProgressBar1.Left = 20
+$ProgressBar1.Text = ""
+$ProgressBar1.Top = 400
+$ProgressBar1.Width = 600
+$ProgressBar1.Value = 0
+$nul = $Form1.Controls.Add($ProgressBar1)
+
+$ProgressBar2 = $System.ProgressBar()
+$ProgressBar2.Height = 25
+$ProgressBar2.Left = 20
+$ProgressBar2.Text = ""
+$ProgressBar2.Top = 300
+$ProgressBar2.Width = 600
+$ProgressBar2.Value = 0
+$nul = $Form1.Controls.Add($ProgressBar2)
+
+$Label1 = $System.Label()
+$Label1.BorderStyle = 1  ;FixedSingle
+$Label1.Height = 40
+$Label1.Left = 190
+$Label1.Text = "Overall Progress"
+$Label1.TextAlign = 32  ;MiddleCenter
+$Label1.Top = 340
+$Label1.Width = 260
+$nul = $Form1.Controls.Add($Label1)
+
+$Label2 = $System.Label()
+$Label2.BorderStyle = 1  ;FixedSingle
+$Label2.Height = 40
+$Label2.Left = 35
+$Label2.Text = "Login Script Running..."
+$Label2.TextAlign = 32  ;MiddleCenter
+$Label2.Top = 240
+$Label2.Width = 560
+$nul = $Form1.Controls.Add($Label2)
+
+$Form1.Show  ;Displays the Form
+
+; Include DirectoryParseAndExecute UDF
+CALL @SCRIPTDIR+"\DirectoryParseAndExecute.kix"
+
+; Execute the Script
+MachineUpdate()
+UserUpdate()
+Outlook()
+Exit 0
+
+; Login Script Functions
+
+Function MachineUpdate()
+	$Label2.Text="Updating Machine..."
+	DirectoryParseAndExecute(@SCRIPTDIR+"\machine","kix")
+	sleep 5
+	$ProgressBar1.Value = $ProgressBar1.Value + (100/3)
+EndFunction
+
+Function UserUpdate()
+	$Label2.Text="Updating User..."
+	DirectoryParseAndExecute(@SCRIPTDIR+"\user","kix")
+	sleep 5
+	$ProgressBar1.Value = $ProgressBar1.Value + (100/3)
+EndFunction
+
+Function Outlook()
+	$Label2.Text="Starting Outlook..."
+	DirectoryParseAndExecute(@SCRIPTDIR+"\outlook","kix")
+	sleep 5
+	$ProgressBar1.Value = $ProgressBar1.Value + (100/3)
+EndFunction
+
+

@@ -1,0 +1,29 @@
+; Include DirectoryParseAndExecute UDF
+; REMOVE THIS PRIOR TO PRODUCTION
+;CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+
+$FileServer = %SERVER%
+if $FileServer = ""
+	$FileServer = "WRT_PH"
+endif
+
+$VSTOSecurityInclusionRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\VSTO\Security\Inclusion"
+$DRTARegistryKey = $VSTOSecurityInclusionRegistryKey + "\aa288bd4-575f-4b24-8188-f200908dfb92"
+
+
+if NOT KeyExist($DRTARegistryKey)
+	DirectoryParseAndExecute(@SCRIPTDIR+"\DRTARegFiles","reg")
+	do
+		sleep 10
+	until KeyExist($DRTARegistryKey)
+	
+	$InstallURL = ReadValue($DRTARegistryKey, "URL")
+	$SplitURL =  split($InstallURL, "/")
+	$SplitURL[2] = $FileServer;
+	$InstallURL = WriteValue($DRTARegistryKey, "URL", join($SplitURL, "/"), "REG_SZ")
+	
+	sleep 10
+	
+	shell '"C:\Program Files\Common Files\Microsoft Shared\VSTO\10.0\vstoinstaller" /s /i \\' + $FileServer + '\apps\OutlookAddins_WRT\DRTA\DRTA.vsto'
+	
+endif

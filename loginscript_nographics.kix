@@ -1,0 +1,43 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+
+; User IDs for Windows & Novell
+$WID = @WUSERID
+$NID = left($WID, 8)
+
+; Home Directory
+$HomeDir = "\\wrt_ph\user\"+$NID
+
+; WRT WinXP Configuration Directory
+$WinXPConfig = "i:\winxp\config3"
+
+; C Drive Documents And Settings - All Users - Application Data
+$AllUsersAppData = "C:\Documents and Settings\All Users\Application Data"
+
+$CurrentUserAppData = "P:\WinXP\Application Data"
+
+
+; Include DirectoryParseAndExecute UDF
+CALL @SCRIPTDIR+"\DirectoryParseAndExecute.kix"
+
+; Execute the Script
+MachineUpdate()
+UserUpdate()
+Outlook()
+
+; Login Script Functions
+
+Function MachineUpdate()
+	DirectoryParseAndExecute(@SCRIPTDIR+"\machine","kix")
+EndFunction
+
+Function UserUpdate()
+	DirectoryParseAndExecute(@SCRIPTDIR+"\user","kix")
+EndFunction
+
+Function Outlook()
+	DirectoryParseAndExecute(@SCRIPTDIR+"\outlook","kix")
+EndFunction

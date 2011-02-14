@@ -1,0 +1,28 @@
+; Update GoogleEarth
+
+
+$GoogleEarthVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Google\Google Earth"
+$GoogleEarthVersion = "5.0.11733.9347" ; the latest WRT-supported version
+
+$GoogleSupported = join(split($GoogleEarthVersion,","),"")
+$GoogleFromRegistry = join(split(ReadValue($GoogleEarthVersionKey, "CurrentVersion"),","),"")
+
+select
+	case $GoogleFromRegistry >= $GoogleSupported
+		? "Latest version or higher already installed"
+	case $GoogleFromRegistry = ""
+		? "Installing latest version..."
+		InstallGoogle()
+	case $GoogleFromRegistry < $GoogleSupported
+		? "Installing latest version..."
+		InstallGoogle()
+endselect
+
+Function InstallGoogle()
+	shell "i:\GoogleEarth\Google_Earth_Install.exe -oe:\GEInstallTemp -y"
+	shell 'psexec -u administrator -p wrtstation -e msiexec -i "e:\GEInstallTemp\install\Google Earth.msi" /qb /passive'
+	shell 'psexec -u administrator -p wrtstation cmd /C rd e:\GEInstallTemp /s /q'
+	shell 'psexec -u administrator -p wrtstation cmd /c del "c:\documents and settings\all users\network menu\desktop\Google Earth.lnk"'
+	shell 'psexec -u administrator -p wrtstation cmd /C rd /s /q "c:\documents and settings\all users\network menu\programs\Google Earth"'
+	WriteValue ($GoogleEarthVersionKey,"CurrentVersion",$GoogleEarthVersion,"REG_SZ")
+EndFunction

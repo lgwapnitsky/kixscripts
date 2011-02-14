@@ -1,0 +1,7 @@
+$DefaultPrinterRegistryKey = "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows"
+
+$DefaultPrinterValueFromRegistry = ReadValue($DefaultPrinterRegistryKey, "Device")
+
+if instrrev ($DefaultPrinterValueFromRegistry, "UPS")
+	WriteValue($DefaultPrinterRegistryKey, "Device", "\\WRT\Southeast Letter.PH.WRT,winspool,Ne13:", "REG_SZ")
+endif

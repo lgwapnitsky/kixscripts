@@ -1,0 +1,44 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+Dim $FileArray[]
+$AcrobatUpdateDir = "i:\adobe\acrobatupdates"
+$UpdatePrefix = "AcrobatUpd"
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = $UpdatePrefix ; the update value to test.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Update Adobe Acrobat
+$CurrentAcrobatVersion = Join(split(getfileversion("D:\Program Files\Adobe\Acrobat 8.0\Acrobat\Acrobat.exe"), "."), "", 3)
+
+;if Not($CurrentAcrobatVersion = $UpdateValueCurrent)
+
+	$FileCounter = 0
+	$FileName = Dir($AcrobatUpdateDir + "\" + $UpdatePrefix + "*.msp")
+		
+	while $FileName <> "" and @ERROR = 0
+		$FileCounter = $FileCounter + 1
+		REDIM Preserve $FileArray[$FileCounter]
+		$FileArray[$FileCounter] = $FileName
+		$UpdateName = Left($FileName, Instr($FileName, "_")-1)
+		$UpdateNumber =  Right($UpdateName, (Len($UpdateName) - Len($UpdatePrefix)))
+		
+		if $UpdateNumber > $CurrentAcrobatVersion
+			SetTitle("Running Update: " + $FileName)
+			? "Updating Adobe Acrobat..."
+			shell 'xcopy ' + $AcrobatUpdateDir + '\' + $FileName + ' e:\temp\*.* /Y /Q /D'
+			shell 'psexec -u administrator -p wrtstation msiexec /update e:\temp\' + $FileName + ' /quiet /norestart'
+			del 'e:\temp\' + $FileName /Q
+		endif
+
+		if @ERROR = 0
+			WriteValue ($UpdateRegistryKey, $UpdateValue, Join(split(getfileversion("D:\Program Files\Adobe\Acrobat 8.0\Acrobat\Acrobat.exe"), "."), "", 3), "REG_SZ")
+		endif
+
+		$FileName = Dir()
+	loop
+;endif

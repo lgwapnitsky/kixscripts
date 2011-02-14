@@ -1,0 +1,28 @@
+Function DirectoryParseAndExecute($Directory,$FileType)
+	Dim $FileCounter
+	Dim $FileArray[]
+	
+	$FileCounter = 0
+	$FileName = Dir($Directory+"\*."+$FileType)
+	
+	while $FileName <> "" and @ERROR = 0
+		$FileCounter = $FileCounter + 1
+		REDIM Preserve $FileArray[$FileCounter]
+		$FileArray[$FileCounter] = $FileName
+		$FileName = Dir()
+	loop
+	
+	for each $element in $FileArray
+		if $element <> ""
+			select
+				case $FileType = "reg"
+					run "regedit /s " + $Directory + "\" +$element
+				case $FileType = "kix"
+					SetTitle($element)
+					call $Directory + "\" + $element
+			endselect
+		endif
+		;uncomment this line if you are using the graphical login script
+		;$ProgressBar2.Value = $ProgressBarValue + (100/$FileCounter)
+	next
+EndFunction

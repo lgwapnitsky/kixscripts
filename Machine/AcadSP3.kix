@@ -1,0 +1,40 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Break On Cls
+;redirectoutput(NUL)
+;$nul=SetConsole("Hide")
+
+;Registry Key for updates...
+$UpdateRegistryKey = "HKEY_LOCAL_MACHINE\SOFTWARE\WRT\Update3\" ; the update key
+$UpdateValue = "AcadSP3" ; the update value to test.
+$UpdateValueNew = "1" ; the test data for the update value.
+$UpdateValueCurrent = ReadValue($UpdateRegistryKey, $UpdateValue) ; the current data for the value
+
+; Determine Station CPU...
+$CPU = substr (%Computername%, 8, len (%Computername%) - 9)
+? "CPU = " + $CPU
+;messagebox ("Station CPU is " + $CPU, KiXtart, 1)
+
+; Conditional execution...
+Select
+  Case not($CPU = "38" or $CPU = "26D" or $CPU = "30D" or $CPU = "D32" or $CPU="320" or %Computername% = "ACPI-MP")
+;     	messagebox ("CPU is Not in the list. Exiting.", KiXtart, 1)
+	? "CPU not in list"
+     	exit
+  Case $UpdateValueCurrent = $UpdateValueNew
+;     	messagebox ("Script already run. Exiting.", KiXtart, 1)
+	? "Script already run"
+     	exit
+  Case 1
+;     	messagebox ("Need to run script. Proceeding.", KiXtart, 1)
+;     	do a bunch of stuff
+	? "Running update"
+	shell 'xcopy I:\ACAD\2009Updates\autocad2009lockedsp3.msp e:\temp\*.* /Y /Q /D'
+	shell 'psexec -u administrator -p wrtstation -e msiexec /update e:\temp\autocad2009lockedsp3.msp /qn'
+	del e:\temp\autocad2009lockedsp3.msp /Q
+	shell 'psexec -u administrator -p wrtstation cmd /C rd "C:\Documents and Settings\All Users\Network Menu\programs\Autodesk" /S /Q'
+	WriteValue ($UpdateRegistryKey,$UpdateValue,$UpdateValueNew,"REG_SZ")
+EndSelect
+
+
+;messagebox ("Script Complete", KiXtart, 1)
+exit

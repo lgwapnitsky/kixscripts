@@ -1,0 +1,53 @@
+if (instr ('%USERDOMAIN%', 'WRT'))
+
+	$OCSInstallDir = "i:\internet\ocs\"
+	$OCSFileVersion = getfileversion("i:\internet\ocs\ocspackage.exe")
+	$OCSFileVersionND = join(split($OCSFileVersion,'.'),'')
+
+	$OCSDir = "c:\program files\ocs inventory agent\"
+	$checkfile = $OCSDIR + 'wrt_ocs.txt'
+	$OCSServiceEXE = $OCSDIR + 'ocsservice.exe'
+
+	open(1,$checkfile)
+	
+	$CFVer = readline(1)
+
+	select
+		case @ERROR <> 0
+			UninstallOCS()
+			InstallOCS()
+		case $CFVer <> $OCSFileVersion
+			UninstallOCS()
+			InstallOCS()
+		case 1
+			"Latest Version Installed"
+	endselect
+
+endif
+
+Function UninstallOCS()
+	shell 'psexec -u administrator -p wrtstation "' + $OCSDir + 'uninst.exe" /S /NOSPLASH'
+	; else 
+		; if (exist($OCSServiceEXE)) and (open(1,$checkfile)=0)
+			; open(1,$checkfile)
+			; $CFVer = readline(1)
+			; ? $CFVer
+			; if (not(instr($CFVer,$OCSFileVersion)))
+				; shell 'psexec -u administrator -p wrtstation -e "' + $OCSDir + 'uninst.exe" /S /NOSPLASH'
+				; close(1)
+	del $checkfile
+			; endif
+	; endif
+EndFunction
+	
+Function InstallOCS()
+	? 'An important update is currently being installed.' + @CRLF + 'Please do not close this window....'
+
+	shell $OCSInstallDir + 'inventory.exe /debug /np /install /deploy:' + $OCSFileVersionND
+	open (1,$checkfile,5)
+	writeline (1, $OCSFileVersion)
+	close (1)
+EndFunction
+
+
+
