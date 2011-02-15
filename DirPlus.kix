@@ -1,0 +1,186 @@
+;Function		DIRPlus()
+;
+;Author		Bryce Lindsay bryce@isorg.net
+;
+;Action		Returns an array containing directory files and folders
+;
+;Syntax		DIRPLUS("PATH","OPTIONS")
+;
+;Version		2.34
+;
+;Date Revised	2-10-05
+;			2005.09.20 2.34 Filed the file/folder option "d" to be non language dependent, thanks Jochen
+;
+;Parameters	Path
+;		  Full path To To a folder that you want To Return information on.
+;		  "c:\program files"
+;
+;		  OPTIONS
+;		  /S          Displays files In specified directory and all subdirectories.
+;                             Use a /S# where # is equal to the subfolder depth that you want to recurse.
+;
+;		  /A          Displays files with specified attributes.
+;		  attributes   D  Directories                R  Read-only files
+;		               H  Hidden files               A  Files ready For archiving
+;		               S  System files               -  Prefix meaning not
+;
+;		  /M          Apply mask string To filter based on InSTR(), separate Each search string witha a |
+;
+;		  /F          Return a given File extension like exe log or txt Seperate each extension type with a space
+;
+;
+;Remarks	Finaly fixed this UDF For To handle multiple recursions,
+;		also should have a faster responce time since it is using the FSO
+;
+;		***Please note that the syntax For version 2.0 of this UDF has changed.***
+;
+;		made some tweeks using feedback from Les! thanks!  Also NTDOC!
+;
+;Returns	Returns and array of FSO objects that are equal the file and folder objects of
+;		the given path.  Also returns a @ERROR code For event handling.
+;
+;Dependencies 	FSO
+;
+;KiXtart Ver	4.22
+;
+;Example(s)	$Dir = dirplus("c:\program files") ;returns all files and folders In the "c:\program files" folder
+;		$Dir = dirplus("c:\program files","/s") ;all fiels and folders including subfolders
+;		$Dir = dirplus("c:\","/a-d") ;returns only a list of files In the c:\
+;		$Dir = dirplus("c:\","/ad") ;returns only a list of folders In the c:\
+;		$Dir = dirplus("c:\program files","/ad /s") ;returns only the folders including all subfolders.
+;
+;		$Dir = dirplus("g:\kix\udf","/s /ad /m dir") ; recursive subfolder search, folders only, using a mask string of "dir"
+;
+;		$desktop = dirplus("%userprofile%\desktop","/a-d")
+;		For Each $file In $desktop
+;			? $file
+;			? $file.size
+;		Next
+;
+Function DirPlus($path,optional $Options, optional $f, optional $sfflag)
+	If not vartype($f)	DIM $f		EndIf
+	If not vartype($sfflag)	DIM $sfflag	EndIf
+
+	DIM $file, $i, $temp, $item, $ex1, $mask,$mask1,$maskArray,$maskarray1,
+	$ex2, $code, $CodeWeight, $targetWeight, $weight, $masktrue
+	DIM $tarray[0]
+
+	$ex1 = SetOption(Explicit,on)
+	$ex2 = SetOption(NoVarsInStrings,on)
+	$codeWeight = 0
+
+	If not Exist($path) 
+		$temp = SetOption(Explicit,$ex1)
+		$temp = SetOption(NoVarsInStrings,$ex2)
+		Exit @ERROR
+	EndIf
+
+	If not vartype($f)
+		$f = CreateObject("Scripting.FileSystemObject").getfolder($path)
+	EndIf
+	If @ERROR 
+		$temp = SetOption(Explicit,$ex1)
+		$temp = SetOption(NoVarsInStrings,$ex2)
+		Exit @ERROR
+	EndIf
+
+ 	For Each $temp In Split($options,"/")
+		$temp=Trim($temp)
+		Select
+		   Case left($temp,1) = "s"
+			If not vartype($sfflag)
+				If Val(right($temp,-1)) = 0
+					$sfflag = -1
+				Else
+					$sfflag = Val(right($temp,-1))
+				EndIf	
+			EndIf
+		   Case Left($temp,1) = "a"
+			Select
+			   Case Right($temp,-1)="d"
+				$codeWeight = $codeWeight + 1
+				$temp = "if $file.attributes & 16 " ;"if $file.type = 'File Folder' "
+			   Case Right($temp,-1)="-d"
+				$codeWeight = $codeWeight + 1
+				$temp = "if ($file.attributes & 16)=0 " ;"if $file.type <> 'File Folder' "
+			   Case Right($temp,-1)="s"
+				$codeWeight = $codeWeight + 1
+				$temp = "if $file.attributes & 4 "
+			   Case Right($temp,-1)="-s"
+				$codeWeight = $codeWeight + 1
+				$temp = "if ($file.attributes & 4)=0 "
+			   Case Right($temp,-1)="h"
+				$codeWeight = $codeWeight + 1
+				$temp = "if $file.attributes & 2 "
+			   Case Right($temp,-1)="-h"
+				$codeWeight = $codeWeight + 1
+				$temp = "if ($file.attributes & 2)=0 "
+			   Case Right($temp,-1)="r"
+				$codeWeight = $codeWeight + 1
+				$temp = "if $file.attributes & 1 "
+			   Case Right($temp,-1)="-r"
+				$codeWeight = $codeWeight + 1
+				$temp = "if ($file.attributes & 1)=0 "
+			   Case Right($temp,-1)="a"
+				$codeWeight = $codeWeight + 1
+				$temp = "if $file.attributes & 32 "
+			   Case Right($temp,-1)="-a"
+				$codeWeight = $codeWeight + 1
+				$temp = "if ($file.attributes & 32)=0 "
+			EndSelect
+			$code = $temp + "$weight=$weight+1 endif" +@CRLF + $code
+
+		   Case Left($temp,1) = "m"
+			$maskarray = Split(Right($temp,-2),"|")
+			$codeweight = $codeweight + 1
+			$code = "$masktrue=0 for Each $mask in $maskarray if instr($file.name,$mask) $masktrue=1 " +
+			"EndIf Next If $masktrue $weight=$weight+1 endif" + @CRLF +$code
+		   Case Left($temp,1) = "f"
+			$maskarray1 = Split(Right($temp,-2)," ")
+			$codeweight = $codeweight + 1
+			$code = "$masktrue=0 for Each $mask1 in $maskarray1 if substr($file.name,Instrrev($file.name,'.')+1)" +
+			"=$mask1 $masktrue=1 EndIf Next If $masktrue $weight=$weight+1 endif" + @CRLF +$code
+
+		EndSelect
+	Next
+	$code = "$weight = 0 $targetWeight = " + $codeweight + @CRLF + $code
+	$code = $code + "if $weight = $targetweight Exit 1 endif"
+
+	For Each $file In $f.subfolders
+		If Execute($code)
+			$tarray[$i] = $file
+			$i = $i + 1
+			ReDIM preserve $tarray[$i]
+		EndIf
+		If $sfflag
+			$temp = dirplus($file,$options,$file,$sfflag-1)
+			For Each $item In $temp
+				$tarray[$i] = $item
+				$i = $i + 1
+				ReDIM preserve $tarray[$i]
+			Next
+		EndIf
+	Next
+	For Each $file In $f.files
+		If Execute($code)
+			$tarray[$i] = $file
+			$i = $i + 1
+
+			ReDIM preserve $tarray[$i]
+		EndIf
+	Next
+
+	If $i
+		ReDIM preserve $tarray[$i-1]
+		$i=0
+	Else
+		$tarray = 0
+	EndIf
+
+	$dirplus = $tarray
+	$temp = SetOption(Explicit,$ex1)
+	$temp = SetOption(NoVarsInStrings,$ex2)
+	Exit @ERROR
+EndFunction
+
+

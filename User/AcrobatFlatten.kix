@@ -1,0 +1,16 @@
+CALL "i:\winxp\kix\DirPlus.kix"
+
+$AppData = "%APPDATA%"
+$AcrobatLoc = $AppData + "\Adobe\Acrobat"
+$FlattenJSFile = "PDFScript_FlattenPages.js"
+$FlattenJSDir = "I:\Adobe\Acrobat Plug-Ins\PDFScript_FlattenPages"
+
+
+$Dir = dirplus($AcrobatLoc, "/s /ad")
+for each $f in $Dir
+	if INSTR($f, "JavaScripts")
+		if not(exist($f + "\" + $FlattenJSFile))
+			copy ($FlattenJSDir + "\" + $FlattenJSFile) $f
+		endif
+	endif
+next
