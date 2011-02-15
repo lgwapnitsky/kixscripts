@@ -1,4 +1,4 @@
-CALL "i:\winxp\kix\DirPlus.kix"
+CALL "i:\winxp\config3\kix\DirPlus.kix"
 
 $AppData = "%APPDATA%"
 $AcrobatLoc = $AppData + "\Adobe\Acrobat"
