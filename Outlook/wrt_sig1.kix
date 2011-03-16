@@ -160,12 +160,6 @@ if instr($strPhone,",,,")
 	$strPhone = $tempPhone + " x." + $phoneExt
 endif
 $objSelection.TypeText("T  " + $strPhone + Chr(11))
-; If not instr($strPhone,"x.")
-	; $objSelection.TypeText(Chr(9))
-; EndIf
-
-$objSelection.TypeText("F  " + $strFax)
-$objSelection.TypeText(Chr(11))
 
 if LEN($strMobile) > 0
 	$objSelection.TypeText("C  " + $strMobile + Chr(11))
@@ -176,14 +170,6 @@ $objSelection.TypeText("E  ")
 $mailSplit = split($strMail, ".")
 
 Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $mailDomain)
-
-; $objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"mailto://"+$strMail,,"E-mail " + $strName, $strMail)
-; $HyperTextString = len($strMail) + 1
-; $objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
-; $objSelection.Font.Underline = "0"
-; $objSelection = $objWord.Selection
-; $objSelection.TypeText(Chr(11))
-
 
 $objSelection = $objDoc.Range()
 
