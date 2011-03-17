@@ -5,9 +5,9 @@ If NOT @LOGONMODE
 	Break off
 EndIf
 
+;Remove this line when adding to the login script
 ;$nul=SetConsole("Hide")
 
-;Remove this line when adding to the login script
 $CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
 $SigLoc = $CurrentUserAppData + "\Microsoft\Signatures\"
 
@@ -26,6 +26,9 @@ endif
 
 Del $SigLoc + "*.*" /s /h
 
+$WRT_grey = "6447714"
+$WRT_green = "2997652"
+
 ;Get data from AD
 ;Open ADSystemInfo object
 $objSysInfo = CreateObject("ADSystemInfo")
@@ -42,7 +45,9 @@ $strMail 		= $objUser.mail
 ;Get the users department.
 ;$strDepartment = $objUser.Department
 ;Get the users company name.
-$strCompany 	= $objUser.Company
+;$strCompany 	= $objUser.Company
+$strCompany1	= "WRT"
+$strCompany2	= "  |  Wallace Roberts & Todd, LLC"
 ;Get the users street address.
 $strStreet		= $objUser.streetAddress
 	
@@ -62,8 +67,9 @@ $strFax		 	= $objUser.FacsimileTelephoneNumber
 $strMobile		= $objUser.Mobile
 ;Get the users homepage.
 ;$strWeb		 	= $objUser.wWWHomePage
-DIM $arrWeb[0]
-$arrWeb[0] = "www.wrtdesign.com"
+$DomainName = "www.wrtdesign.com"
+;DIM $arrWeb[0]
+;$arrWeb[0] = "www.wrtdesign.com"
 ; if instr($strMail, "solomonetc")
 	; redim PRESERVE $arrWeb[1]
 	; $arrWeb[1] = "www.solomonetc-wrt.com"
@@ -85,10 +91,10 @@ $objSignatureEntries = $objSignatureObject.EmailSignatureEntries
 
 ;Write signature.
 ;Set font to use in the signature.
-$objSelection.Font.Color = "0"
-$objSelection.Font.Name = "Arial"
+$objSelection.Font.Color = $WRT_grey
+$objSelection.Font.Name = "Calibri"
 ;Set the font size.
-$objSelection.Font.Size = "9"
+$objSelection.Font.Size = "10.5"
 ;Write text and use the variables filled when retrieving data from AD.
 $objSelection.Font.bold = "1"
 $objSelection.TypeText($strName)
@@ -96,7 +102,7 @@ if LEN($strDescription) > 0
 	$objSelection.TypeText(", " + $strDescription)
 endif
 ;Set font size.
-$objSelection.Font.Size = "8"
+$objSelection.Font.Size = "10"
 $objSelection.Font.bold = "0"
 ;Write a "soft" enter. Just like br in HTML.
 $objSelection.TypeText(Chr(11))
@@ -110,13 +116,30 @@ if LEN($strNotes) > 0
 	$objSelection.TypeText(Chr(11))
 endif
 
-$objSelection.Font.Bold = "1"
-$objSelection.Font.Color = "3152295"
-$objSelection.TypeText($strCompany)
+Hyperlink($strCompany1, "1", "10.5", $WRT_green, "http", $DomainName)
+Hyperlink($strCompany2, "0", "10.5", $WRT_green, "http", $DomainName)
+;$objSelection.Font.Bold = "1"
+;$objSelection.Font.Color = "2997652"
+;$objSelection.TypeText($strCompany1)
+; $objSelection.Font.Bold = "0"
+; $objSelection.TypeText($strCompany2)
+; $objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"http://"+$DomainName,,"", "");, $DomainName)
+; $HyperTextString = len($strCompany1) + len($strCompany2) + 1
+; $objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
+; $objSelection.Font.Underline = "0"
+; $objSelection.Font.Color = "2997652"
+; $objSelection = $objWord.Selection
+;	$domainNumber = $domainNumber + 1
+;	if (UBound($DomainName) > 0) AND ($domainNumber < UBound($DomainName))
+;		$objSelection.TypeText(Chr(11))
+;	endif
+;Next
+
 $objSelection.TypeText(Chr(11))
 ;Set the colour of the following text.
-$objSelection.Font.Color = "0"
+$objSelection.Font.Color = $WRT_grey
 $objSelection.Font.Bold = "0"
+$objSelection.Font.Size = "10"
 ;Write text and use the variables filled when retrieving data from AD.
 $objSelection.TypeText($strStreet + ", " + $strCity + ", " + $strState + " " + $strPostalcode)
 
@@ -136,44 +159,17 @@ if instr($strPhone,",,,")
 	
 	$strPhone = $tempPhone + " x." + $phoneExt
 endif
-$objSelection.TypeText("T " + $strPhone + Chr(9))
-If not instr($strPhone,"x.")
-	$objSelection.TypeText(Chr(9))
-EndIf
-
-$objSelection.TypeText("F " + $strFax)
-$objSelection.TypeText(Chr(11))
+$objSelection.TypeText("T  " + $strPhone + Chr(11))
 
 if LEN($strMobile) > 0
-	$objSelection.TypeText("C " + $strMobile + Chr(9) + Chr(9))
+	$objSelection.TypeText("C  " + $strMobile + Chr(11))
 endif
 
-$objSelection.TypeText("E ")
-$objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"mailto://"+$strMail,,"E-mail " + $strName, $strMail)
-$HyperTextString = len($strMail) + 1
-$objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
-$objSelection.font.size = "8"
-$objSelection.Font.Color = "0"
-$objSelection.Font.Underline = "0"
-$objSelection.Font.Name = "Arial"
-$objSelection = $objWord.Selection
-$objSelection.TypeText(Chr(11))
 
-$domainNumber = 0
-for each $DomainName in $arrWeb
-	$objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"http://"+$DomainName,,"", $DomainName)
-	$HyperTextString = len($DomainName) + 1
-	$objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
-	$objSelection.font.size = "8"
-	$objSelection.Font.Color = "0"
-	$objSelection.Font.Underline = "0"
-	$objSelection.Font.Name = "Arial"
-	$objSelection = $objWord.Selection
-	$domainNumber = $domainNumber + 1
-	if (UBound($DomainName) > 0) AND ($domainNumber < UBound($DomainName))
-		$objSelection.TypeText(Chr(11))
-	endif
-Next
+$objSelection.TypeText("E  ")
+$mailSplit = split($strMail, ".")
+
+Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $mailDomain)
 
 $objSelection = $objDoc.Range()
 
@@ -196,3 +192,14 @@ $objSignatureObject.ReplyMessageSignature = @FULLNAME
 ;Save the signature and quit word
 $objDoc.Saved = 1
 $objWord.Quit
+
+Function Hyperlink($string, $bold, $fontsize, $color, $urlType, $address)
+	$objLink = $objSelection.Hyperlinks.Add($objSelection.Range,$urlType+"://"+$address,,"",$string)
+	$HyperTextSTring = len($string) + 1
+	$objSelection = $objDoc.Range($objSelection.End - $HyperTextString, $objSelection.End)
+	$objSelection.Font.Size = $fontsize
+	$objSelection.Font.Underline = 0
+	$objSelection.Font.Bold = $bold
+	$objSelection.Font.Color = $color
+	$objSelection = $objWord.Selection
+EndFunction
