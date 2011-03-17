@@ -167,9 +167,11 @@ endif
 
 
 $objSelection.TypeText("E  ")
-$mailSplit = split($strMail, ".")
-
-Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $mailDomain)
+$userSplit = split($strMail, "@@")
+;$domainSplit = split($strMail, ".")
+$dSplitNum = UBound($domainSplit)
+$strMail = $userSplit[0] + "@@WRTdesign.com"
+Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $strMail)
 
 $objSelection = $objDoc.Range()
 
