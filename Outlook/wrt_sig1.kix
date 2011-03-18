@@ -93,6 +93,8 @@ $objSignatureObject = $objEmailOptions.EmailSignature
 $objSignatureEntries = $objSignatureObject.EmailSignatureEntries
 
 ;Write signature.
+
+
 ;Set font to use in the signature.
 $objSelection.Font.Color = $WRT_grey
 $objSelection.Font.Name = "Calibri"
@@ -156,6 +158,7 @@ $strMail = lcase($userSplit[0]) + "@@WRTdesign.com"
 Hyperlink($strMail, "0", "8.5", $WRT_grey, "mailto", $strMail)
 
 $objSelection = $objDoc.Range()
+$objSelection.ParagraphFormat.LineSpacingRule = $objWord.WdLineSpacing.wdLineSpaceSingle
 
 ;Add signature.
 ;You could change @FULLNAME to whatever you want. Just be sure to change it the same on the
