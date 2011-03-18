@@ -113,13 +113,12 @@ endif
 $objSelection.TypeText(Chr(11))
 ;Write text and use the variables filled when retrieving data from AD.
 $objSelection.TypeText(ucase($strTitle))
-$objSelection.TypeText(Chr(11))
 
 if LEN($strNotes) > 0
-	$splitNotes = join(split($strNotes,@CRLF),CHR(11))
-	$objSelection.TypeText($splitNotes)
-	$objSelection.TypeText(Chr(11))
+	$splitNotes = join(split($strNotes,@CRLF)," / ")
+	$objSelection.TypeText(" / " + ucase($splitNotes))
 endif
+$objSelection.TypeText(Chr(11))
 
 Hyperlink($strCompany1, "1", "10.5", $WRT_green, "http", $DomainName)
 Hyperlink($strCompany2, "0", "10.5", $WRT_green, "http", $DomainName)
