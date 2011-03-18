@@ -103,7 +103,7 @@ $objSelection.Font.bold = "1"
 $objSelection.TypeText($strName)
 
 ;Set font size.
-$objSelection.Font.Size = "10"
+$objSelection.Font.Size = "8"
 $objSelection.Font.bold = "0"
 
 if LEN($strDescription) > 0
@@ -128,7 +128,7 @@ $objSelection.TypeText(Chr(11))
 ;Set the colour of the following text.
 $objSelection.Font.Color = $WRT_grey
 $objSelection.Font.Bold = "0"
-$objSelection.Font.Size = "10"
+$objSelection.Font.Size = "8.5"
 ;Write text and use the variables filled when retrieving data from AD.
 $objSelection.TypeText($strStreet + CHR(11) + $strCity + ", " + $strState + " " + $strPostalcode)
 
@@ -153,8 +153,8 @@ $objSelection.Font.bold = "1"
 $objSelection.TypeText("E  ")
 $objSelection.Font.bold = "0"
 $userSplit = split($strMail, "@@")
-$strMail = $userSplit[0] + "@@WRTdesign.com"
-Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $strMail)
+$strMail = lcase($userSplit[0]) + "@@WRTdesign.com"
+Hyperlink($strMail, "0", "8.5", $WRT_grey, "mailto", $strMail)
 
 $objSelection = $objDoc.Range()
 
