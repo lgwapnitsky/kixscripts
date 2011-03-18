@@ -8,6 +8,9 @@ EndIf
 ;Remove this line when adding to the login script
 ;$nul=SetConsole("Hide")
 
+CALL "e:\kix_scripts\RegEx.kix"
+
+
 $CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
 $SigLoc = $CurrentUserAppData + "\Microsoft\Signatures\"
 
@@ -98,16 +101,18 @@ $objSelection.Font.Size = "10.5"
 ;Write text and use the variables filled when retrieving data from AD.
 $objSelection.Font.bold = "1"
 $objSelection.TypeText($strName)
-if LEN($strDescription) > 0
-	$objSelection.TypeText(", " + $strDescription)
-endif
+
 ;Set font size.
 $objSelection.Font.Size = "10"
 $objSelection.Font.bold = "0"
+
+if LEN($strDescription) > 0
+	$objSelection.TypeText(" " + $strDescription)
+endif
 ;Write a "soft" enter. Just like br in HTML.
 $objSelection.TypeText(Chr(11))
 ;Write text and use the variables filled when retrieving data from AD.
-$objSelection.TypeText($strTitle)
+$objSelection.TypeText(ucase($strTitle))
 $objSelection.TypeText(Chr(11))
 
 if LEN($strNotes) > 0
@@ -118,22 +123,6 @@ endif
 
 Hyperlink($strCompany1, "1", "10.5", $WRT_green, "http", $DomainName)
 Hyperlink($strCompany2, "0", "10.5", $WRT_green, "http", $DomainName)
-;$objSelection.Font.Bold = "1"
-;$objSelection.Font.Color = "2997652"
-;$objSelection.TypeText($strCompany1)
-; $objSelection.Font.Bold = "0"
-; $objSelection.TypeText($strCompany2)
-; $objLink = $objSelection.Hyperlinks.Add($objSelection.Range,"http://"+$DomainName,,"", "");, $DomainName)
-; $HyperTextString = len($strCompany1) + len($strCompany2) + 1
-; $objSelection = $objDoc.Range($objSelection.End - $HyperTextString,$objSelection.End)
-; $objSelection.Font.Underline = "0"
-; $objSelection.Font.Color = "2997652"
-; $objSelection = $objWord.Selection
-;	$domainNumber = $domainNumber + 1
-;	if (UBound($DomainName) > 0) AND ($domainNumber < UBound($DomainName))
-;		$objSelection.TypeText(Chr(11))
-;	endif
-;Next
 
 $objSelection.TypeText(Chr(11))
 ;Set the colour of the following text.
@@ -141,35 +130,29 @@ $objSelection.Font.Color = $WRT_grey
 $objSelection.Font.Bold = "0"
 $objSelection.Font.Size = "10"
 ;Write text and use the variables filled when retrieving data from AD.
-$objSelection.TypeText($strStreet + ", " + $strCity + ", " + $strState + " " + $strPostalcode)
+$objSelection.TypeText($strStreet + CHR(11) + $strCity + ", " + $strState + " " + $strPostalcode)
 
 ;Write a "soft" enter. Just like br in HTML.
 $objSelection.TypeText(Chr(11))
 ;Write text and use the variables filled when retrieving data from AD.
-if instr($strPhone,",,,")
-	$tempPhone = left($strPhone,14)
-	select
-		case left(right($strPhone,3),1)=","
-			$phoneExt = right($strPhone,2)
-		case left(right($strPhone,4),1)=","
-			$phoneExt = right($strPhone,3)
-		case left(right($strPhone,5),1)=","
-			$phoneExt = right($strPhone,4)
-	endselect
-	
-	$strPhone = $tempPhone + " x." + $phoneExt
-endif
-$objSelection.TypeText("T  " + $strPhone + Chr(11))
+
+$strPhone = FixPhoneNumber($strPhone)
+$objSelection.Font.bold = "1"
+$objSelection.TypeText("T  ")
+$objSelection.Font.bold = "0"
+$objSelection.TypeText($strPhone + Chr(11))
 
 if LEN($strMobile) > 0
-	$objSelection.TypeText("C  " + $strMobile + Chr(11))
+	$objSelection.Font.bold = "1"
+	$objSelection.TypeText("C  ")
+	$objSelection.Font.bold = "0"
+	$objSelection.TypeText(FixPhoneNumber($strMobile) + Chr(11))
 endif
 
-
+$objSelection.Font.bold = "1"
 $objSelection.TypeText("E  ")
+$objSelection.Font.bold = "0"
 $userSplit = split($strMail, "@@")
-;$domainSplit = split($strMail, ".")
-$dSplitNum = UBound($domainSplit)
 $strMail = $userSplit[0] + "@@WRTdesign.com"
 Hyperlink($strMail, "0", "10", $WRT_grey, "mailto", $strMail)
 
@@ -204,4 +187,9 @@ Function Hyperlink($string, $bold, $fontsize, $color, $urlType, $address)
 	$objSelection.Font.Bold = $bold
 	$objSelection.Font.Color = $color
 	$objSelection = $objWord.Selection
+EndFunction
+
+Function FixPhoneNumber($phoneNumber)
+	$FixPhoneNumber = RegExpReplace($phoneNumber, "(\,+)(\d*)", " x.$2", 1, 1)
+	$FixPhoneNumber = RegExpReplace($FixPhoneNumber, "\((\d{3})\)\s*(\d{3})(?:-|\s*)(\d{4}.*)", "$1.$2.$3", 1, 1)
 EndFunction
