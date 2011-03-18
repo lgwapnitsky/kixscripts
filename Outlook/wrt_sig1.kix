@@ -8,7 +8,7 @@ EndIf
 ;Remove this line when adding to the login script
 ;$nul=SetConsole("Hide")
 
-CALL "e:\kix_scripts\RegEx.kix"
+CALL "i:\winxp\config3\kix\RegEx.kix"
 
 
 $CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
