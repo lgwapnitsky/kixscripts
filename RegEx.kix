@@ -1,0 +1,55 @@
+Function RegExpTest($Pattern, $String, $IgnoreCase)
+
+   Dim $regEx, $Match, $Matches             ; Create variable.
+
+   $regEx = createobject("VBscript.RegExp") ; Create a regular expression.
+
+   $regEx.Pattern    = $Pattern             ; Set pattern.
+   $regEx.IgnoreCase = val($IgnoreCase)     ; Set case insensitivity.
+
+   $RegExpTest = $regEx.Test($String)       ; Execute test search.
+EndFunction
+
+Function RegExpFind($Pattern, $String, $IgnoreCase, $Global)
+
+   Dim $regEx, $Match, $Matches, $i, $j, $k ; Create variable.
+   Dim $Results[0]
+   $regEx = createobject("VBscript.RegExp") ; Create a regular expression.
+
+   $regEx.Pattern    = $Pattern             ; Set pattern.
+   $regEx.IgnoreCase = val($IgnoreCase)     ; Set case insensitivity.
+   $regEx.Global     = val($Global)         ; Set global applicability.
+
+   $Matches = $regEx.Execute($String)        ; Execute search.
+
+   $k=0
+   For Each $Match in $Matches              ; Iterate Matches collection.
+      Dim $MatchValue[0]
+      ReDim Preserve $Results[$k]
+
+      $MatchValue[0] = $Match.Value
+
+      if $Match.Submatches.count > 0
+         for $i=0 to $Match.Submatches.count
+            ReDim Preserve $MatchValue[$i+1]
+            $MatchValue[$i+1] = $Match.Submatches($i)
+         next
+      endif
+      $Results[$k] = $MatchValue
+      $k=$k+1
+   Next
+   $RegExpFind = $Results
+EndFunction
+
+Function RegExpReplace($String1, $Pattern, $String2, $IgnoreCase, $Global)
+
+   Dim $regEx                               ; Create variable.
+   Dim $Results[0]
+   $regEx = createobject("VBscript.RegExp") ; Create a regular expression.
+
+   $regEx.Pattern    = $Pattern             ; Set pattern.
+   $regEx.IgnoreCase = val($IgnoreCase)     ; Set case insensitivity.
+   $regEx.Global     = val($Global)         ; Set global applicability.
+
+   $RegExpReplace = $regEx.Replace($String1, $String2)   ; Execute search.
+EndFunction
