@@ -1,0 +1,57 @@
+call "i:\winxp\config3\kix\RegEx.kix"
+
+select
+	case instr(@ProductType, "XP")
+		$sysDir = "%systemroot%\System32\Macromed\Flash"
+	case instr(@ProductType, "Vista")
+		$sysDir = "%systemroot%\SysWOW64"
+endselect
+
+$disableFlashVar = "AutoUpdateDisable=1"
+$flashConfigFile = $sysDir + "\mms.cfg"
+
+Dim $tempFile[0]
+$lines = 0
+$enabled = 1
+$replace = 0
+$disableFlash
+
+if open(1, $flashConfigFile, 2) = 0
+	$disableFlash = ReadLine(1)
+	while @error = 0
+		$lines = $lines + 1
+		redim preserve $tempFile[$lines]
+		if instr($disableFlash, "AutoUpdateDisable")
+			$disVar = split($disableFlash, "=", 2)
+			$disabled = $disVar[1]
+			if not $disabled = "1"
+				$disableFlash = $disableFlashVar
+				$replace = $replace + 1
+			else
+				$enabled = 0
+			endif
+		endif
+		? $disableFlash
+		$tempFile[$lines - 1] = $disableFlash
+		$disableFlash = ReadLine(1)
+	Loop
+	close(1)
+else
+	redim preserve $tempFile[1]
+	$tempFile[0] = $disableFlashVar
+	$replace = 1
+endif
+
+if $enabled = 1
+	del $flashConfigFile
+	if open(1, $flashConfigFile, 5) = 0
+		if $replace = 0
+			writeline(1, $disableFlashVar + @crlf)
+		endif
+		for each $line in $tempFile
+			? $line
+			writeline(1, $line + @crlf)
+		next
+		close(1)
+	endif
+endif
