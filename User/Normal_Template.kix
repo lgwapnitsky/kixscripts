@@ -1,0 +1,16 @@
+; update normal.dotx
+;	copy "I:\WinXP\User3\Application Data\Microsoft\Templates\normal.dotm" "P:\WinXP\Application Data\Microsoft\Templates\normal.dotm"
+
+
+$mastertemplate = "I:\WinXP\User3\Application Data\Microsoft\Templates\normal.dotm"
+$usertemplate = "P:\WinXP\Application Data\Microsoft\Templates\normal.dotm"
+
+
+$Result = CompareFileTimes($mastertemplate, $usertemplate)
+IF $Result = 1 OR $Result = -3
+  COPY $mastertemplate $usertemplate
+ENDIF
+
+
+	
+	
