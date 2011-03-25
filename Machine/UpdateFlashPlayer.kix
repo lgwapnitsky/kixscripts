@@ -1,3 +1,11 @@
+
+select
+	case instr(@ProductType, "Windows XP")
+		$sysDir
+	case instr(@ProductType, "Vista")
+endselect
+
+;if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 ; Update Flash Player
 $FlashPlayerVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Macromedia\FlashPlayer"
 
