@@ -1,5 +1,3 @@
-call "i:\winxp\config3\kix\RegEx.kix"
-
 select
 	case instr(@ProductType, "XP")
 		$sysDir = "%systemroot%\System32\Macromed\Flash"

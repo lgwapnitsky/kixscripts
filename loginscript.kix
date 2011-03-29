@@ -101,6 +101,9 @@ $Form1.Show  ;Displays the Form
 ; Include DirectoryParseAndExecute UDF
 CALL @SCRIPTDIR+"\DirectoryParseAndExecute.kix"
 
+; Include RegEx UDF
+CALL "i:\winxp\config3\kix\RegEx.kix"
+
 ; Execute the Script
 MachineUpdate()
 UserUpdate()
