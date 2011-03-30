@@ -5,8 +5,9 @@ If NOT @LOGONMODE
 	Break off
 EndIf
 
-;Remove this line when adding to the login script
+;Remove these lines when adding to the login script
 ;$nul=SetConsole("Hide")
+;call "i:\winxp\config3\kix\RegEx.kix"
 
 $CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
 $SigLoc = $CurrentUserAppData + "\Microsoft\Signatures\"
