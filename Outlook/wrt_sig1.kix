@@ -2,7 +2,6 @@
 ;This will prevent you being logged of when testing this script and closing
 ;it when it's running.
 If NOT @LOGONMODE
-	call "i:\winxp\config3\kix\RegEx.kix"
 	Break off
 EndIf
 
