@@ -12,6 +12,14 @@ EndIf
 $CurrentUserAppData=ExpandEnvironmentVars(%appdata%)
 $SigLoc = $CurrentUserAppData + "\Microsoft\Signatures\"
 
+;Check to see if the user wants their Cell # displayed...
+if exist ("p:\SigCell.no") 
+	$ShowCell = False 
+else 
+	$ShowCell = True
+endif
+
+;Check to see if the signature should be updated each login...
 if (exist("c:\outlook.no") or exist("p:\outlook.no") or exist ("p:\updatesig.no"))
 	exit 0
 else 
@@ -141,7 +149,7 @@ $objSelection.TypeText("T  ")
 $objSelection.Font.bold = "0"
 $objSelection.TypeText($strPhone + Chr(11))
 
-if LEN($strMobile) > 0
+if (LEN($strMobile) > 0 and $ShowCell = True)
 	$objSelection.Font.bold = "1"
 	$objSelection.TypeText("C  ")
 	$objSelection.Font.bold = "0"
