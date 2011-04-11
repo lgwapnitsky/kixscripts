@@ -5,7 +5,7 @@ dim $OutlookVersion
 $Office11 = "d:\progra~1\micros~1\office11\"
 $Office12 = "d:\progra~1\micros~1\office12\"
 $OutlookExecutable = "outlook.exe"
-$ProfileName = "%UserName%"
+$ProfileName = ReadValue("HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles", "DefaultProfile")
 
 if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 	Select
@@ -14,7 +14,7 @@ if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 			run $OutlookVersion
 		case exist($Office12 + $OutlookExecutable)
 			$OutlookVersion = $Office12 + $OutlookExecutable
-			run $OutlookVersion
+			run '$OutlookVersion /Profile $ProfileName'
 	EndSelect
 
 	if exist ("c:\frontdesk.txt")
