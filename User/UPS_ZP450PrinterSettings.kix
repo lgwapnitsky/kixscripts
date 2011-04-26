@@ -1,7 +1,7 @@
 ;debug on
 ; Include DirectoryParseAndExecute UDF
 ; REMOVE THIS PRIOR TO PRODUCTION
- CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+; CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
 
 
 $UPSZP450RegistryKey = "HKEY_CURRENT_USER\Software\WRT\"
