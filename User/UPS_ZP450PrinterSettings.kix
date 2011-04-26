@@ -1,0 +1,14 @@
+;debug on
+; Include DirectoryParseAndExecute UDF
+; REMOVE THIS PRIOR TO PRODUCTION
+; CALL "i:\winxp\config3\kix\DirectoryParseAndExecute.kix"
+
+
+$UPSZP450RegistryKey = "HKEY_CURRENT_USER\Software\WRT\"
+$UPSZP450ValueWRT = "1" ; the current level for New Users
+$UPSZP450ValueFromRegistry = ReadValue($UPSZP450RegistryKey, "UPSZP450")
+
+If NOT ($UPSZP450ValueFromRegistry = $UPSZP450ValueWRT)	
+	DirectoryParseAndExecute(@SCRIPTDIR+"\UPSZP450RegFiles","reg")
+	WriteValue ($UPSZP450RegistryKey,"UPSZP450",$UPSZP450ValueWRT,"REG_SZ")
+endif
