@@ -11,7 +11,8 @@ endselect
 
 ;if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 ; Update Java Runtime Environment
-$JREVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\JreMetrics\"
+;$JREVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\"
+
 
 ; the latest WRT-supported version
 $Dir = DirPlus("i:\java\","/m jre /f exe")
@@ -27,14 +28,27 @@ for each $File in $Dir
 	endif
 Next
 
-$JRESupported = getfileversion($newest, "Full Version")
-$JREFromRegistry = ReadValue($JREVersionKey,"NewJreVersion")
+$JRESupported = split(getfileversion($newest, "Full Version"),"-")
 
-if $JREFromRegistry <> $JRESupported
+dim $JREFromRegistry 
+$index = 0
+$update = "true"
+:regInstalled
+$JREFromRegistry = enumkey("HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\", $index)
+if @error = 0
+	$index = $index + 1
+	? $JREFromRegistry
+	if $JREFromRegistry <> $JRESupported[0]
+		goto regInstalled
+	else
+		$update = "false"
+	endif
+endif
+
+if $update = "true"
 	InstallJRE($newest)
 	quit
 endif
-
 
 
 Function InstallJRE($installFile)
