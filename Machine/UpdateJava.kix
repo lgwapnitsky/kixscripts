@@ -1,7 +1,7 @@
 call "i:\winxp\config3\kix\DirPlus.kix"
 
-;Remove before putting in the login script
-call "i:\winxp\config3\kix\Regex.kix"
+; Remove before putting in the login script
+; call "i:\winxp\config3\kix\Regex.kix"
 
 select
 	case instr(@ProductType, "Windows XP")
@@ -11,7 +11,6 @@ endselect
 
 ;if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 ; Update Java Runtime Environment
-;$JREVersionKey = "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\"
 
 
 ; the latest WRT-supported version
