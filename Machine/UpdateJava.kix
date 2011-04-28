@@ -1,0 +1,60 @@
+call "i:\winxp\config3\kix\DirPlus.kix"
+
+; Remove before putting in the login script
+; call "i:\winxp\config3\kix\Regex.kix"
+
+select
+	case instr(@ProductType, "Windows XP")
+		$sysDir
+	case instr(@ProductType, "Vista")
+endselect
+
+;if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
+; Update Java Runtime Environment
+
+
+; the latest WRT-supported version
+$Dir = DirPlus("i:\java\","/m jre /f exe")
+$newest = null;
+for each $File in $Dir
+	if $newest = null
+		$newest = $File
+	else
+		$dateCheck = CompareFileTimes($File, $newest)
+		if $dateCheck = 1
+			$newest = $File
+		endif
+	endif
+Next
+
+$JRESupported = split(getfileversion($newest, "Full Version"),"-")
+
+dim $JREFromRegistry 
+$index = 0
+$update = "true"
+:regInstalled
+$JREFromRegistry = enumkey("HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\", $index)
+if @error = 0
+	$index = $index + 1
+	? $JREFromRegistry
+	if $JREFromRegistry <> $JRESupported[0]
+		goto regInstalled
+	else
+		$update = "false"
+	endif
+endif
+
+if $update = "true"
+	InstallJRE($newest)
+	quit
+endif
+
+
+Function InstallJRE($installFile)
+	? "updating JRE..."
+	$destInstall = RegExpReplace($installFile, "(i:\\java)", "e:\temp", 1, 1)
+	copy $installFile $destInstall
+	shell 'psexec -u administrator -p wrtstation $destInstall /s'
+	del $destInstall
+EndFunction
+
