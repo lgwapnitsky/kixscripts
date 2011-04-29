@@ -33,8 +33,6 @@ if $JRESupported[0] = ""
 	goto SupportedVersion
 endif
 
-
-
 dim $JREFromRegistry 
 $index = 0
 $update = "true"
