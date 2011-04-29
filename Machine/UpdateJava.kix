@@ -1,33 +1,37 @@
 ; Remove before putting in the login script
-; call "i:\winxp\config3\kix\Regex.kix"
-; call "i:\winxp\config3\kix\DirPlus.kix"
-
-
-select
-	case instr(@ProductType, "Windows XP")
-		$sysDir
-	case instr(@ProductType, "Vista")
-endselect
+ ;call "i:\winxp\config3\kix\Regex.kix"
+ ;call "i:\winxp\config3\kix\DirPlus.kix"
 
 ;if not (exist("c:\outlook.no") or exist("p:\outlook.no"))
 ; Update Java Runtime Environment
 
-
 ; the latest WRT-supported version
-$Dir = DirPlus("i:\java\","/m jre /f exe")
-$newest = null;
-for each $File in $Dir
-	if $newest = null
-		$newest = $File
-	else
-		$dateCheck = CompareFileTimes($File, $newest)
-		if $dateCheck = 1
-			$newest = $File
+$osArchs="x64","i586"
+
+dim $newestByArch[ubound($osArchs)];
+
+for $i = 0 to ubound($osArchs)
+	$Dir = DirPlus("i:\java\"+$osArchs[$i],"/m jre /f exe")
+	$newestByArch[$i] = null;
+	for each $File in $Dir
+		if $newestByArch[$i] = null
+			$newestByArch[$i] = $File
+		else
+			$dateCheck = CompareFileTimes($File, $newestByArch[$i])
+			if $dateCheck = 1
+				$newestByArch[$i] = $File
+			endif
 		endif
-	endif
+	Next
 Next
 
-$JRESupported = split(getfileversion($newest, "Full Version"),"-")
+$index = 0
+:SupportedVersion
+$JRESupported = split(getfileversion($newestByArch[$index], "Full Version"),"-")
+if $JRESupported[0] = ""
+	$index = $index + 1
+	goto SupportedVersion
+endif
 
 dim $JREFromRegistry 
 $index = 0
@@ -45,17 +49,17 @@ if @error = 0
 endif
 
 if $update = "true"
-	InstallJRE($newest)
-	quit
+	InstallJRE($newestByArch)
 endif
-
 
 Function InstallJRE($installFile)
 	? "updating JRE..."
-	$destInstall = RegExpReplace($installFile, "(i:\\java)", "e:\temp", 1, 1)
-	copy $installFile $destInstall
-	shell 'psexec -u administrator -p wrtstation $destInstall /s'
-	del $destInstall
-	WriteValue("HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Update\Policy", "EnableJavaUpdate", "REG_DWORD", "0")
+	for $update = 0 to ubound($osArchs)
+		$destInstall = RegExpReplace($installFile[$update], "(i:\\java\\(i586|x64))", "e:\temp", 1, 1)
+		copy $installFile[$update] $destInstall
+		shell 'psexec -u administrator -p wrtstation $destInstall /s'
+		del $destInstall
+	next
+	WriteValue("HKLM\SOFTWARE\JavaSoft\Java Update\Policy", "EnableJavaUpdate","0", "REG_DWORD")
 EndFunction
 
