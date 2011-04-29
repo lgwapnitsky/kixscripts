@@ -1,7 +1,7 @@
-call "i:\winxp\config3\kix\DirPlus.kix"
-
 ; Remove before putting in the login script
 ; call "i:\winxp\config3\kix\Regex.kix"
+; call "i:\winxp\config3\kix\DirPlus.kix"
+
 
 select
 	case instr(@ProductType, "Windows XP")
@@ -56,5 +56,6 @@ Function InstallJRE($installFile)
 	copy $installFile $destInstall
 	shell 'psexec -u administrator -p wrtstation $destInstall /s'
 	del $destInstall
+	WriteValue("HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Update\Policy", "EnableJavaUpdate", "REG_DWORD", "0")
 EndFunction
 
