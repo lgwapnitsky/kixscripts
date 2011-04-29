@@ -46,7 +46,6 @@ endif
 
 if $update = "true"
 	InstallJRE($newest)
-	quit
 endif
 
 
