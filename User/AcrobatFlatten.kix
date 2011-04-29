@@ -1,4 +1,5 @@
-CALL "i:\winxp\config3\kix\DirPlus.kix"
+; Remove before adding to login script
+;CALL "i:\winxp\config3\kix\DirPlus.kix"
 
 $AppData = "%APPDATA%"
 $AcrobatLoc = $AppData + "\Adobe\Acrobat"

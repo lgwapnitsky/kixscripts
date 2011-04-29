@@ -24,7 +24,10 @@ $CurrentUserAppData = "P:\WinXP\Application Data"
 CALL @SCRIPTDIR+"\DirectoryParseAndExecute.kix"
 
 ; Include RegEx UDF
-CALL "i:\winxp\config3\kix\RegEx.kix"
+CALL @SCRIPTDIR+"\RegEx.kix"
+
+; Include DirPlus.UDF
+CALL @SCRIPTDIR+"\DirPlus.kix"
 
 
 ; Execute the Script

@@ -104,6 +104,9 @@ CALL @SCRIPTDIR+"\DirectoryParseAndExecute.kix"
 ; Include RegEx UDF
 CALL "i:\winxp\config3\kix\RegEx.kix"
 
+; Include DirPlus.UDF
+CALL "i:\winxp\config3\kix\DirPlus.kix"
+
 ; Execute the Script
 MachineUpdate()
 UserUpdate()
